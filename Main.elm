@@ -31,12 +31,12 @@ cells' rows columns =
     |> List.concatMap
          (\y ->
             [0..columns]
-              |> List.map (\x ->
-                             ((x, y) , (Cell (x * 10) (y * 10) 10 10 True))))
--- (x % 2 == 0)
+              |> List.map
+                 (\x ->
+                    let alive = ((x % 5 == 0) || (y % 5 == 0))
+                    in ((x, y) , (Cell (x * 10) (y * 10) 10 10 alive))))
+
 -- UPDATE
-
-
 numAliveNeighbours dict (x,y) cell =
   let neighbours = [(x - 1, y - 1),
                     (x - 1, y),
@@ -67,28 +67,33 @@ handleDeadCell dict coord cell =
 
 handleCell : (Dict Coord Cell) -> Coord -> Cell -> Cell
 handleCell dict coord cell =
-  -- cell
   case cell.alive of
     True  -> handleLivingCell dict coord cell
     False -> handleDeadCell  dict coord cell
 
 update : Time -> Model -> Model
 update _ model =
-  { model | generation = Dict.map (handleCell model.generation) model.generation }
+  let folder coord cell dict =
+        Dict.insert coord (handleCell dict coord cell) dict
+      generation' = Dict.foldl folder model.generation model.generation
+  in
+  { model | generation = generation' }
+
+
 
 -- VIEW
 
 cell : Cell -> Form
 cell {x, y, height, width, alive} =
   rect (toFloat width) (toFloat height)
-    |> filled (if alive then green else red)
+    |> filled (if alive then black else white)
     |> move (toFloat x, toFloat y)
 
 
 view : Model -> Element
 view {generation} =
   List.map cell (Dict.values generation)
-    |> collage 600 600
+    |> collage 800 800
 
 
 
@@ -99,4 +104,4 @@ view {generation} =
 
 main : Signal Element
 main =
-  Signal.map view (Signal.foldp update (init 10 10) (Time.fps 1))
+  Signal.map view (Signal.foldp update (init 30 30) (Time.fps 5))
