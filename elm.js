@@ -7951,18 +7951,30 @@ Elm.Main.make = function (_elm) {
          }
    });
    var update = F2(function (_p10,model) {
-      var folder = F3(function (coord,cell,dict) {    return A3($Dict.insert,coord,A3(handleCell,dict,coord,cell),dict);});
-      var generation$ = A3($Dict.foldl,folder,model.generation,model.generation);
+      var folder = F2(function (coord,dict) {
+         var _p11 = A2($Dict.get,coord,dict);
+         if (_p11.ctor === "Just") {
+               return A3($Dict.insert,coord,A3(handleCell,dict,coord,_p11._0),dict);
+            } else {
+               return $Dict.empty;
+            }
+      });
+      var generation$ = A3($List.foldl,folder,model.generation,$Dict.keys(model.generation));
       return _U.update(model,{generation: generation$});
    });
+   var glider = _U.list([{ctor: "_Tuple2",_0: 1,_1: 0}
+                        ,{ctor: "_Tuple2",_0: 2,_1: 1}
+                        ,{ctor: "_Tuple2",_0: 0,_1: 2}
+                        ,{ctor: "_Tuple2",_0: 1,_1: 2}
+                        ,{ctor: "_Tuple2",_0: 2,_1: 2}]);
    var Cell = F5(function (a,b,c,d,e) {    return {x: a,y: b,height: c,width: d,alive: e};});
    var cells$ = F2(function (rows,columns) {
       return A2($List.concatMap,
       function (y) {
          return A2($List.map,
          function (x) {
-            var alive = _U.eq(A2($Basics._op["%"],x,5),0) || _U.eq(A2($Basics._op["%"],y,5),0);
-            return {ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: x,_1: y},_1: A5(Cell,x * 10,y * 10,10,10,alive)};
+            var alive = A2($List.member,{ctor: "_Tuple2",_0: x,_1: y},glider);
+            return {ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: x,_1: 0 - y},_1: A5(Cell,x * 10,(0 - y) * 10,10,10,alive)};
          },
          _U.range(0,columns));
       },
@@ -7970,12 +7982,13 @@ Elm.Main.make = function (_elm) {
    });
    var Model = function (a) {    return {generation: a};};
    var init = F2(function (rows,columns) {    return Model($Dict.fromList(A2(cells$,rows,columns)));});
-   var main = A2($Signal.map,view,A3($Signal.foldp,update,A2(init,30,30),$Time.fps(5)));
+   var main = A2($Signal.map,view,A3($Signal.foldp,update,A2(init,30,30),$Time.fps(1)));
    return _elm.Main.values = {_op: _op
                              ,Model: Model
                              ,Cell: Cell
                              ,init: init
                              ,cells$: cells$
+                             ,glider: glider
                              ,numAliveNeighbours: numAliveNeighbours
                              ,handleLivingCell: handleLivingCell
                              ,handleDeadCell: handleDeadCell

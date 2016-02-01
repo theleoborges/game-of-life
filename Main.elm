@@ -8,7 +8,7 @@ import Random
 import Debug exposing (log)
 import Time exposing (Time)
 import Dict exposing (Dict)
-import Maybe
+import Maybe exposing (withDefault)
 
 -- MODEL
 
@@ -33,8 +33,10 @@ cells' rows columns =
             [0..columns]
               |> List.map
                  (\x ->
-                    let alive = ((x % 5 == 0) || (y % 5 == 0))
-                    in ((x, y) , (Cell (x * 10) (y * 10) 10 10 alive))))
+                    let alive = List.member (x,y) glider--x % 3 == 0 && x % 5 == 0
+                    in ((x, -y) , (Cell (x * 10) (-y * 10) 10 10 alive))))
+
+glider = [(1,0), (2,1), (0,2), (1,2), (2,2)]
 
 -- UPDATE
 numAliveNeighbours dict (x,y) cell =
@@ -73,9 +75,11 @@ handleCell dict coord cell =
 
 update : Time -> Model -> Model
 update _ model =
-  let folder coord cell dict =
-        Dict.insert coord (handleCell dict coord cell) dict
-      generation' = Dict.foldl folder model.generation model.generation
+  let folder coord dict =
+        case Dict.get coord dict of
+          (Just cell') -> Dict.insert coord (handleCell dict coord cell') dict
+          Nothing      -> Dict.empty
+      generation' = List.foldl folder model.generation (Dict.keys model.generation)
   in
   { model | generation = generation' }
 
@@ -104,4 +108,4 @@ view {generation} =
 
 main : Signal Element
 main =
-  Signal.map view (Signal.foldp update (init 30 30) (Time.fps 5))
+  Signal.map view (Signal.foldp update (init 30 30) (Time.fps 1))
