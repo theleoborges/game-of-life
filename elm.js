@@ -6803,6 +6803,7 @@ Elm.Main.make = function (_elm) {
       A2($Graphics$Collage.filled,_p1.alive ? $Color.black : $Color.white,A2($Graphics$Collage.rect,$Basics.toFloat(_p1.width),$Basics.toFloat(_p1.height))));
    };
    var view = function (_p2) {    var _p3 = _p2;return A3($Graphics$Collage.collage,800,800,A2($List.map,cell,$Dict.values(_p3.generation)));};
+   var toggleIf = F3(function (pred,cell,n) {    return pred(n) ? _U.update(cell,{alive: $Basics.not(cell.alive)}) : cell;});
    var neighbouringCoords = function (_p4) {
       var _p5 = _p4;
       var _p7 = _p5._1;
@@ -6823,20 +6824,13 @@ Elm.Main.make = function (_elm) {
       var neighbours = neighbouringCoords(coord);
       return A3($List.foldr,livingStatus,0,neighbours);
    });
-   var handleLivingCell = F3(function (dict,coord,cell) {
-      var n = A2(numAliveNeighbours,dict,coord);
-      return _U.cmp(n,2) < 0 || _U.cmp(n,3) > 0 ? _U.update(cell,{alive: false}) : cell;
-   });
-   var handleDeadCell = F3(function (dict,coord,cell) {
-      var n = A2(numAliveNeighbours,dict,coord);
-      return _U.eq(n,3) ? _U.update(cell,{alive: true}) : cell;
-   });
    var handleCell = F3(function (dict,coord,cell) {
+      var n = A2(numAliveNeighbours,dict,coord);
       var _p8 = cell.alive;
       if (_p8 === true) {
-            return A3(handleLivingCell,dict,coord,cell);
+            return A3(toggleIf,function (n) {    return _U.cmp(n,2) < 0 || _U.cmp(n,3) > 0;},cell,n);
          } else {
-            return A3(handleDeadCell,dict,coord,cell);
+            return A3(toggleIf,F2(function (x,y) {    return _U.eq(x,y);})(3),cell,n);
          }
    });
    var update = F2(function (_p9,model) {
@@ -6872,7 +6866,7 @@ Elm.Main.make = function (_elm) {
          function (x) {
             var y$ = (0 - y) * 10 + 400;
             var x$ = x * 10 - 400;
-            var alive = A2($List.member,{ctor: "_Tuple2",_0: x,_1: y},$Patterns.gliderGun);
+            var alive = A2($List.member,{ctor: "_Tuple2",_0: x,_1: y},$Patterns.grower);
             return {ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: x,_1: y},_1: A5(Cell,x$,y$,10,10,alive)};
          },
          _U.range(0,columns));
@@ -6887,7 +6881,7 @@ Elm.Main.make = function (_elm) {
          return A2($List._op["::"],coord,neighbouringCoords(coord));
       },
       A2($List.map,$Basics.fst,A2($List.filter,function (_p17) {    return function (_) {    return _.alive;}($Basics.snd(_p17));},cells$))));
-      return A2(Model,$Dict.fromList(cells$),A2($Debug.log,"lc",livingCells));
+      return A2(Model,$Dict.fromList(cells$),livingCells);
    });
    var main = A2($Signal.map,view,A3($Signal.foldp,update,A2(init,100,100),$Time.fps(20)));
    return _elm.Main.values = {_op: _op
@@ -6898,8 +6892,7 @@ Elm.Main.make = function (_elm) {
                              ,update: update
                              ,neighbouringCoords: neighbouringCoords
                              ,numAliveNeighbours: numAliveNeighbours
-                             ,handleLivingCell: handleLivingCell
-                             ,handleDeadCell: handleDeadCell
+                             ,toggleIf: toggleIf
                              ,handleCell: handleCell
                              ,view: view
                              ,cell: cell

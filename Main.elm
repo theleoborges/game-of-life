@@ -24,7 +24,7 @@ init rows columns =
           |> List.map fst
           |> List.concatMap (\coord -> coord :: neighbouringCoords coord)
           |> Set.fromList
-  in  Model (Dict.fromList cells') (Debug.log "lc" livingCells)
+  in  Model (Dict.fromList cells') livingCells
 
 cells rows columns =
   [0..rows]
@@ -33,8 +33,7 @@ cells rows columns =
             [0..columns]
               |> List.map
                  (\x ->
---                    let alive = x % 9 == 0 || x % 3 /= 0
-                    let alive = List.member (x,y) Patterns.gliderGun
+                    let alive = List.member (x,y) Patterns.grower
                         x'     = (x * 10)  - 400
                         y'     = (-y * 10) + 400
                     in ((x, y) , (Cell x' y' 10 10 alive))))
@@ -51,7 +50,6 @@ update _ model =
         in case newCell of
              (Just (old, new)) -> ( Dict.insert coord new newGen,
                                     if old.alive /= new.alive
---                                    then Set.union newLivingCells (Set.fromList <| coord :: neighbouringCoords coord)
                                     then List.append newLivingCells <| coord :: neighbouringCoords coord
                                     else newLivingCells
                                   )
@@ -79,23 +77,17 @@ numAliveNeighbours dict coord =
           |> withDefault acc
   in List.foldr livingStatus 0 neighbours
 
-handleLivingCell dict coord cell =
-  let n = numAliveNeighbours dict coord
-  in if n < 2 || n > 3
-     then {cell | alive = False}
-     else cell
-
-handleDeadCell dict coord cell =
-  let n = numAliveNeighbours dict coord
-  in if n == 3
-     then {cell | alive = True}
+toggleIf pred cell n =
+  if pred n
+     then {cell | alive = not cell.alive}
      else cell
 
 handleCell : (Dict Coord Cell) -> Coord -> Cell -> Cell
 handleCell dict coord cell =
-  case cell.alive of
-    True  -> handleLivingCell dict coord cell
-    False -> handleDeadCell  dict coord cell
+  let n = numAliveNeighbours dict coord
+  in case cell.alive of
+       True  -> toggleIf (\n -> n < 2 || n > 3) cell n
+       False -> toggleIf ((==) 3)               cell n
 
 
 -- VIEW
