@@ -14,6 +14,7 @@ Elm.Main.make = function (_elm) {
    $Maybe = Elm.Maybe.make(_elm),
    $Patterns = Elm.Patterns.make(_elm),
    $Result = Elm.Result.make(_elm),
+   $Set = Elm.Set.make(_elm),
    $Signal = Elm.Signal.make(_elm),
    $Time = Elm.Time.make(_elm);
    var _op = {};
@@ -58,12 +59,22 @@ Elm.Main.make = function (_elm) {
          }
    });
    var update = F2(function (_p9,model) {
-      var folder = F3(function (coord,cell,dict) {    return A3($Dict.insert,coord,A3(handleCell,model.generation,coord,cell),dict);});
-      var generation$ = A3($Dict.foldr,folder,model.generation,model.generation);
-      return _U.update(model,{generation: generation$});
+      var folder = F2(function (coord,newModel) {
+         var newCell = A2($Maybe.map,A2(handleCell,model.generation,coord),A2($Dict.get,coord,model.generation));
+         var _p10 = newCell;
+         if (_p10.ctor === "Just") {
+               var _p11 = _p10._0;
+               return _U.update(newModel,
+               {generation: A3($Dict.insert,coord,_p11,newModel.generation)
+               ,livingCells: _p11.alive ? A2($Set.insert,coord,newModel.livingCells) : newModel.livingCells});
+            } else {
+               return newModel;
+            }
+      });
+      return A3($Set.foldr,folder,model,model.livingCells);
    });
    var Cell = F5(function (a,b,c,d,e) {    return {x: a,y: b,height: c,width: d,alive: e};});
-   var cells$ = F2(function (rows,columns) {
+   var cells = F2(function (rows,columns) {
       return A2($List.concatMap,
       function (y) {
          return A2($List.map,
@@ -77,14 +88,20 @@ Elm.Main.make = function (_elm) {
       },
       _U.range(0,rows));
    });
-   var Model = function (a) {    return {generation: a};};
-   var init = F2(function (rows,columns) {    return Model($Dict.fromList(A2(cells$,rows,columns)));});
+   var Model = F2(function (a,b) {    return {generation: a,livingCells: b};});
+   var init = F2(function (rows,columns) {
+      var cells$ = A2(cells,rows,columns);
+      var livingCells = $Set.fromList(A2($List.map,
+      $Basics.fst,
+      A2($List.filter,function (_p12) {    return function (_) {    return _.alive;}($Basics.snd(_p12));},cells$)));
+      return A2(Model,$Dict.fromList(cells$),A2($Debug.log,"lc",livingCells));
+   });
    var main = A2($Signal.map,view,A3($Signal.foldp,update,A2(init,70,70),$Time.fps(20)));
    return _elm.Main.values = {_op: _op
                              ,Model: Model
                              ,Cell: Cell
                              ,init: init
-                             ,cells$: cells$
+                             ,cells: cells
                              ,update: update
                              ,numAliveNeighbours: numAliveNeighbours
                              ,handleLivingCell: handleLivingCell

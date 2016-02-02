@@ -7,21 +7,25 @@ import Time exposing (Time)
 import Dict exposing (Dict)
 import Patterns
 import Maybe exposing (withDefault)
+import Set exposing (Set)
 
 -- MODEL
 
-type alias Model = { generation : Dict Coord Cell }
+type alias Model = { generation  : Dict Coord Cell,
+                     livingCells : Set Coord}
 type alias Coord = (Int, Int)
 type alias Cell  = {x: Int, y: Int, height: Int, width: Int, alive: Bool}
 
 
 init rows columns =
-  cells' rows columns
-    |> Dict.fromList
-    |> Model
+  let cells'      =  cells rows columns
+      livingCells =
+        List.filter (.alive << snd) cells'
+          |> List.map fst
+          |> Set.fromList
+  in  Model (Dict.fromList cells') (Debug.log "lc" livingCells)
 
-
-cells' rows columns =
+cells rows columns =
   [0..rows]
     |> List.concatMap
          (\y ->
@@ -37,14 +41,32 @@ cells' rows columns =
 
 -- UPDATE
 
+-- update : Time -> Model -> Model
+-- update _ model =
+--   let folder coord cell dict =
+--         Dict.insert coord (handleCell model.generation coord cell) dict
+--       generation' = Dict.foldr folder model.generation model.generation
+--   in
+--   { model | generation = generation' }
+
+
 update : Time -> Model -> Model
 update _ model =
-  let folder coord cell dict =
-        Dict.insert coord (handleCell model.generation coord cell) dict
-      generation' = Dict.foldr folder model.generation model.generation
-  in
-  { model | generation = generation' }
+  let folder coord newModel =
+        let newCell =
+              Dict.get coord model.generation
+                |> Maybe.map (handleCell model.generation coord)
+        in case newCell of
+             (Just c) -> { newModel | generation  = Dict.insert coord c newModel.generation,
+                           livingCells = if c.alive
+                                         then Set.insert coord  newModel.livingCells
+--                                         else Set.remove coord  newModel.livingCells
+                                         else newModel.livingCells
+                         }
 
+             Nothing  -> newModel
+--  in List.foldr folder model (Dict.keys model.generation)
+  in Set.foldr folder model model.livingCells
 
 numAliveNeighbours dict (x,y) =
   let neighbours = [(x - 1, y - 1),
