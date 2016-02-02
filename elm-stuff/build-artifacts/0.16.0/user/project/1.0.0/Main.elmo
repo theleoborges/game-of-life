@@ -23,7 +23,7 @@ Elm.Main.make = function (_elm) {
       A2($Graphics$Collage.filled,_p1.alive ? $Color.black : $Color.white,A2($Graphics$Collage.rect,$Basics.toFloat(_p1.width),$Basics.toFloat(_p1.height))));
    };
    var view = function (_p2) {    var _p3 = _p2;return A3($Graphics$Collage.collage,800,800,A2($List.map,cell,$Dict.values(_p3.generation)));};
-   var numAliveNeighbours = F3(function (dict,_p4,cell) {
+   var numAliveNeighbours = F2(function (dict,_p4) {
       var _p5 = _p4;
       var _p8 = _p5._1;
       var _p7 = _p5._0;
@@ -36,14 +36,14 @@ Elm.Main.make = function (_elm) {
                                ,{ctor: "_Tuple2",_0: _p7 + 1,_1: _p8 - 1}
                                ,{ctor: "_Tuple2",_0: _p7 + 1,_1: _p8}
                                ,{ctor: "_Tuple2",_0: _p7 + 1,_1: _p8 + 1}]);
-      return A3($List.foldr,F2(function (status,acc) {    return status ? acc + 1 : acc;}),0,A2($List.map,livingStatus,neighbours));
+      return A3($List.foldl,F2(function (status,acc) {    return status ? acc + 1 : acc;}),0,A2($List.map,livingStatus,neighbours));
    });
    var handleLivingCell = F3(function (dict,coord,cell) {
-      var n = A3(numAliveNeighbours,dict,coord,cell);
+      var n = A2(numAliveNeighbours,dict,coord);
       return _U.cmp(n,2) < 0 || _U.cmp(n,3) > 0 ? _U.update(cell,{alive: false}) : cell;
    });
    var handleDeadCell = F3(function (dict,coord,cell) {
-      var n = A3(numAliveNeighbours,dict,coord,cell);
+      var n = A2(numAliveNeighbours,dict,coord);
       return _U.eq(n,3) ? _U.update(cell,{alive: true}) : cell;
    });
    var handleCell = F3(function (dict,coord,cell) {
@@ -55,30 +55,71 @@ Elm.Main.make = function (_elm) {
          }
    });
    var update = F2(function (_p10,model) {
-      var folder = F2(function (coord,dict) {
-         var _p11 = A2($Dict.get,coord,dict);
-         if (_p11.ctor === "Just") {
-               return A3($Dict.insert,coord,A3(handleCell,dict,coord,_p11._0),dict);
-            } else {
-               return $Dict.empty;
-            }
-      });
-      var generation$ = A3($List.foldl,folder,model.generation,$Dict.keys(model.generation));
+      var folder = F3(function (coord,cell,dict) {    return A3($Dict.insert,coord,A3(handleCell,model.generation,coord,cell),dict);});
+      var generation$ = A3($Dict.foldl,folder,model.generation,model.generation);
       return _U.update(model,{generation: generation$});
    });
-   var glider = _U.list([{ctor: "_Tuple2",_0: 1,_1: 0}
-                        ,{ctor: "_Tuple2",_0: 2,_1: 1}
-                        ,{ctor: "_Tuple2",_0: 0,_1: 2}
-                        ,{ctor: "_Tuple2",_0: 1,_1: 2}
-                        ,{ctor: "_Tuple2",_0: 2,_1: 2}]);
+   var grower = _U.list([{ctor: "_Tuple2",_0: 20,_1: 30}
+                        ,{ctor: "_Tuple2",_0: 22,_1: 30}
+                        ,{ctor: "_Tuple2",_0: 22,_1: 29}
+                        ,{ctor: "_Tuple2",_0: 24,_1: 28}
+                        ,{ctor: "_Tuple2",_0: 24,_1: 27}
+                        ,{ctor: "_Tuple2",_0: 24,_1: 26}
+                        ,{ctor: "_Tuple2",_0: 26,_1: 27}
+                        ,{ctor: "_Tuple2",_0: 26,_1: 26}
+                        ,{ctor: "_Tuple2",_0: 26,_1: 25}
+                        ,{ctor: "_Tuple2",_0: 27,_1: 26}]);
+   var gliderGun = _U.list([{ctor: "_Tuple2",_0: 3,_1: 7}
+                           ,{ctor: "_Tuple2",_0: 4,_1: 7}
+                           ,{ctor: "_Tuple2",_0: 3,_1: 8}
+                           ,{ctor: "_Tuple2",_0: 4,_1: 8}
+                           ,{ctor: "_Tuple2",_0: 13,_1: 7}
+                           ,{ctor: "_Tuple2",_0: 13,_1: 8}
+                           ,{ctor: "_Tuple2",_0: 13,_1: 9}
+                           ,{ctor: "_Tuple2",_0: 14,_1: 6}
+                           ,{ctor: "_Tuple2",_0: 14,_1: 10}
+                           ,{ctor: "_Tuple2",_0: 15,_1: 5}
+                           ,{ctor: "_Tuple2",_0: 16,_1: 5}
+                           ,{ctor: "_Tuple2",_0: 15,_1: 11}
+                           ,{ctor: "_Tuple2",_0: 16,_1: 11}
+                           ,{ctor: "_Tuple2",_0: 17,_1: 8}
+                           ,{ctor: "_Tuple2",_0: 18,_1: 6}
+                           ,{ctor: "_Tuple2",_0: 18,_1: 10}
+                           ,{ctor: "_Tuple2",_0: 19,_1: 7}
+                           ,{ctor: "_Tuple2",_0: 19,_1: 8}
+                           ,{ctor: "_Tuple2",_0: 19,_1: 9}
+                           ,{ctor: "_Tuple2",_0: 20,_1: 8}
+                           ,{ctor: "_Tuple2",_0: 23,_1: 5}
+                           ,{ctor: "_Tuple2",_0: 24,_1: 5}
+                           ,{ctor: "_Tuple2",_0: 23,_1: 6}
+                           ,{ctor: "_Tuple2",_0: 24,_1: 6}
+                           ,{ctor: "_Tuple2",_0: 23,_1: 7}
+                           ,{ctor: "_Tuple2",_0: 24,_1: 7}
+                           ,{ctor: "_Tuple2",_0: 25,_1: 4}
+                           ,{ctor: "_Tuple2",_0: 25,_1: 8}
+                           ,{ctor: "_Tuple2",_0: 27,_1: 3}
+                           ,{ctor: "_Tuple2",_0: 27,_1: 4}
+                           ,{ctor: "_Tuple2",_0: 27,_1: 8}
+                           ,{ctor: "_Tuple2",_0: 27,_1: 9}
+                           ,{ctor: "_Tuple2",_0: 37,_1: 5}
+                           ,{ctor: "_Tuple2",_0: 37,_1: 6}
+                           ,{ctor: "_Tuple2",_0: 38,_1: 5}
+                           ,{ctor: "_Tuple2",_0: 38,_1: 6}]);
+   var glider = _U.list([{ctor: "_Tuple2",_0: 11,_1: 0}
+                        ,{ctor: "_Tuple2",_0: 12,_1: 1}
+                        ,{ctor: "_Tuple2",_0: 10,_1: 2}
+                        ,{ctor: "_Tuple2",_0: 11,_1: 2}
+                        ,{ctor: "_Tuple2",_0: 12,_1: 2}]);
    var Cell = F5(function (a,b,c,d,e) {    return {x: a,y: b,height: c,width: d,alive: e};});
    var cells$ = F2(function (rows,columns) {
       return A2($List.concatMap,
       function (y) {
          return A2($List.map,
          function (x) {
-            var alive = A2($List.member,{ctor: "_Tuple2",_0: x,_1: y},glider);
-            return {ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: x,_1: 0 - y},_1: A5(Cell,x * 10,(0 - y) * 10,10,10,alive)};
+            var y$ = (0 - y) * 10;
+            var x$ = x * 10;
+            var alive = A2($List.member,{ctor: "_Tuple2",_0: x,_1: y},grower);
+            return {ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: x,_1: y},_1: A5(Cell,x$,y$,10,10,alive)};
          },
          _U.range(0,columns));
       },
@@ -86,19 +127,21 @@ Elm.Main.make = function (_elm) {
    });
    var Model = function (a) {    return {generation: a};};
    var init = F2(function (rows,columns) {    return Model($Dict.fromList(A2(cells$,rows,columns)));});
-   var main = A2($Signal.map,view,A3($Signal.foldp,update,A2(init,30,30),$Time.fps(1)));
+   var main = A2($Signal.map,view,A3($Signal.foldp,update,A2(init,40,40),$Time.fps(10)));
    return _elm.Main.values = {_op: _op
                              ,Model: Model
                              ,Cell: Cell
                              ,init: init
                              ,cells$: cells$
                              ,glider: glider
+                             ,gliderGun: gliderGun
+                             ,grower: grower
+                             ,update: update
                              ,numAliveNeighbours: numAliveNeighbours
                              ,handleLivingCell: handleLivingCell
                              ,handleDeadCell: handleDeadCell
                              ,handleCell: handleCell
-                             ,update: update
-                             ,cell: cell
                              ,view: view
+                             ,cell: cell
                              ,main: main};
 };
