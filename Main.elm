@@ -35,20 +35,11 @@ cells rows columns =
                  (\x ->
 --                    let alive = x % 9 == 0 || x % 3 /= 0
                     let alive = List.member (x,y) Patterns.gliderGun
-
                         x'     = (x * 10)  - 400
                         y'     = (-y * 10) + 400
                     in ((x, y) , (Cell x' y' 10 10 alive))))
 
 -- UPDATE
-
--- update : Time -> Model -> Model
--- update _ model =
---   let folder coord cell dict =
---         Dict.insert coord (handleCell model.generation coord cell) dict
---       generation' = Dict.foldr folder model.generation model.generation
---   in
---   { model | generation = generation' }
 
 
 update : Time -> Model -> Model
@@ -60,15 +51,14 @@ update _ model =
         in case newCell of
              (Just (old, new)) -> ( Dict.insert coord new newGen,
                                     if old.alive /= new.alive
-                                    then Set.union newLivingCells (Set.fromList <| coord :: neighbouringCoords coord)
+--                                    then Set.union newLivingCells (Set.fromList <| coord :: neighbouringCoords coord)
+                                    then List.append newLivingCells <| coord :: neighbouringCoords coord
                                     else newLivingCells
---                                    else newModel.livingCells
                                   )
 
              Nothing  -> (newGen, newLivingCells)
---  in List.foldr folder model (Dict.keys model.generation)
-      (newGen, newLivingCells) = Set.foldr folder (model.generation, Set.empty) model.livingCells
-  in { model | generation = newGen, livingCells = newLivingCells }
+      (newGen, newLivingCells) = Set.foldr folder (model.generation, []) model.livingCells
+  in { model | generation = newGen, livingCells = Set.fromList newLivingCells }
 
 neighbouringCoords : Coord -> List Coord
 neighbouringCoords (x,y) =
@@ -81,15 +71,8 @@ neighbouringCoords (x,y) =
    (x + 1, y),
    (x + 1, y + 1)]
 
-numAliveNeighbours dict (x,y) =
-  let neighbours = [(x - 1, y - 1),
-                    (x - 1, y),
-                    (x - 1, y + 1),
-                    (x,     y - 1),
-                    (x,     y + 1),
-                    (x + 1, y - 1),
-                    (x + 1, y),
-                    (x + 1, y + 1)]
+numAliveNeighbours dict coord =
+  let neighbours = neighbouringCoords coord
       livingStatus coord acc =
         Dict.get coord dict
           |> Maybe.map (\cell -> if cell.alive then (acc + 1) else acc)
