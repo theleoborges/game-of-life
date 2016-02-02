@@ -1,0 +1,100 @@
+Elm.Patterns = Elm.Patterns || {};
+Elm.Patterns.make = function (_elm) {
+   "use strict";
+   _elm.Patterns = _elm.Patterns || {};
+   if (_elm.Patterns.values) return _elm.Patterns.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var horizontal = _U.list([{ctor: "_Tuple2",_0: 5,_1: 25}
+                            ,{ctor: "_Tuple2",_0: 6,_1: 25}
+                            ,{ctor: "_Tuple2",_0: 7,_1: 25}
+                            ,{ctor: "_Tuple2",_0: 8,_1: 25}
+                            ,{ctor: "_Tuple2",_0: 9,_1: 25}
+                            ,{ctor: "_Tuple2",_0: 10,_1: 25}
+                            ,{ctor: "_Tuple2",_0: 11,_1: 25}
+                            ,{ctor: "_Tuple2",_0: 12,_1: 25}
+                            ,{ctor: "_Tuple2",_0: 14,_1: 25}
+                            ,{ctor: "_Tuple2",_0: 15,_1: 25}
+                            ,{ctor: "_Tuple2",_0: 16,_1: 25}
+                            ,{ctor: "_Tuple2",_0: 17,_1: 25}
+                            ,{ctor: "_Tuple2",_0: 18,_1: 25}
+                            ,{ctor: "_Tuple2",_0: 22,_1: 25}
+                            ,{ctor: "_Tuple2",_0: 23,_1: 25}
+                            ,{ctor: "_Tuple2",_0: 24,_1: 25}
+                            ,{ctor: "_Tuple2",_0: 31,_1: 25}
+                            ,{ctor: "_Tuple2",_0: 32,_1: 25}
+                            ,{ctor: "_Tuple2",_0: 33,_1: 25}
+                            ,{ctor: "_Tuple2",_0: 34,_1: 25}
+                            ,{ctor: "_Tuple2",_0: 35,_1: 25}
+                            ,{ctor: "_Tuple2",_0: 36,_1: 25}
+                            ,{ctor: "_Tuple2",_0: 38,_1: 25}
+                            ,{ctor: "_Tuple2",_0: 39,_1: 25}
+                            ,{ctor: "_Tuple2",_0: 40,_1: 25}
+                            ,{ctor: "_Tuple2",_0: 41,_1: 25}
+                            ,{ctor: "_Tuple2",_0: 42,_1: 25}]);
+   var dieHard = _U.list([{ctor: "_Tuple2",_0: 19,_1: 25}
+                         ,{ctor: "_Tuple2",_0: 20,_1: 25}
+                         ,{ctor: "_Tuple2",_0: 20,_1: 26}
+                         ,{ctor: "_Tuple2",_0: 24,_1: 26}
+                         ,{ctor: "_Tuple2",_0: 25,_1: 26}
+                         ,{ctor: "_Tuple2",_0: 26,_1: 26}
+                         ,{ctor: "_Tuple2",_0: 25,_1: 24}]);
+   var grower = _U.list([{ctor: "_Tuple2",_0: 20,_1: 30}
+                        ,{ctor: "_Tuple2",_0: 22,_1: 30}
+                        ,{ctor: "_Tuple2",_0: 22,_1: 29}
+                        ,{ctor: "_Tuple2",_0: 24,_1: 28}
+                        ,{ctor: "_Tuple2",_0: 24,_1: 27}
+                        ,{ctor: "_Tuple2",_0: 24,_1: 26}
+                        ,{ctor: "_Tuple2",_0: 26,_1: 27}
+                        ,{ctor: "_Tuple2",_0: 26,_1: 26}
+                        ,{ctor: "_Tuple2",_0: 26,_1: 25}
+                        ,{ctor: "_Tuple2",_0: 27,_1: 26}]);
+   var gliderGun = _U.list([{ctor: "_Tuple2",_0: 3,_1: 7}
+                           ,{ctor: "_Tuple2",_0: 4,_1: 7}
+                           ,{ctor: "_Tuple2",_0: 3,_1: 8}
+                           ,{ctor: "_Tuple2",_0: 4,_1: 8}
+                           ,{ctor: "_Tuple2",_0: 13,_1: 7}
+                           ,{ctor: "_Tuple2",_0: 13,_1: 8}
+                           ,{ctor: "_Tuple2",_0: 13,_1: 9}
+                           ,{ctor: "_Tuple2",_0: 14,_1: 6}
+                           ,{ctor: "_Tuple2",_0: 14,_1: 10}
+                           ,{ctor: "_Tuple2",_0: 15,_1: 5}
+                           ,{ctor: "_Tuple2",_0: 16,_1: 5}
+                           ,{ctor: "_Tuple2",_0: 15,_1: 11}
+                           ,{ctor: "_Tuple2",_0: 16,_1: 11}
+                           ,{ctor: "_Tuple2",_0: 17,_1: 8}
+                           ,{ctor: "_Tuple2",_0: 18,_1: 6}
+                           ,{ctor: "_Tuple2",_0: 18,_1: 10}
+                           ,{ctor: "_Tuple2",_0: 19,_1: 7}
+                           ,{ctor: "_Tuple2",_0: 19,_1: 8}
+                           ,{ctor: "_Tuple2",_0: 19,_1: 9}
+                           ,{ctor: "_Tuple2",_0: 20,_1: 8}
+                           ,{ctor: "_Tuple2",_0: 23,_1: 5}
+                           ,{ctor: "_Tuple2",_0: 24,_1: 5}
+                           ,{ctor: "_Tuple2",_0: 23,_1: 6}
+                           ,{ctor: "_Tuple2",_0: 24,_1: 6}
+                           ,{ctor: "_Tuple2",_0: 23,_1: 7}
+                           ,{ctor: "_Tuple2",_0: 24,_1: 7}
+                           ,{ctor: "_Tuple2",_0: 25,_1: 4}
+                           ,{ctor: "_Tuple2",_0: 25,_1: 8}
+                           ,{ctor: "_Tuple2",_0: 27,_1: 3}
+                           ,{ctor: "_Tuple2",_0: 27,_1: 4}
+                           ,{ctor: "_Tuple2",_0: 27,_1: 8}
+                           ,{ctor: "_Tuple2",_0: 27,_1: 9}
+                           ,{ctor: "_Tuple2",_0: 37,_1: 5}
+                           ,{ctor: "_Tuple2",_0: 37,_1: 6}
+                           ,{ctor: "_Tuple2",_0: 38,_1: 5}
+                           ,{ctor: "_Tuple2",_0: 38,_1: 6}]);
+   var glider = _U.list([{ctor: "_Tuple2",_0: 11,_1: 0}
+                        ,{ctor: "_Tuple2",_0: 12,_1: 1}
+                        ,{ctor: "_Tuple2",_0: 10,_1: 2}
+                        ,{ctor: "_Tuple2",_0: 11,_1: 2}
+                        ,{ctor: "_Tuple2",_0: 12,_1: 2}]);
+   return _elm.Patterns.values = {_op: _op,glider: glider,gliderGun: gliderGun,grower: grower,dieHard: dieHard,horizontal: horizontal};
+};
