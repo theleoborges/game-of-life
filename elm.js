@@ -6836,20 +6836,43 @@ Elm.Main.make = function (_elm) {
             return A3(handleDeadCell,dict,coord,cell);
          }
    });
-   var update = F2(function (_p9,model) {
-      var folder = F2(function (coord,newModel) {
-         var newCell = A2($Maybe.map,A2(handleCell,model.generation,coord),A2($Dict.get,coord,model.generation));
-         var _p10 = newCell;
-         if (_p10.ctor === "Just") {
-               var _p11 = _p10._0;
-               return _U.update(newModel,
-               {generation: A3($Dict.insert,coord,_p11,newModel.generation)
-               ,livingCells: _p11.alive ? A2($Set.insert,coord,newModel.livingCells) : newModel.livingCells});
+   var neighbouringCoords = function (_p9) {
+      var _p10 = _p9;
+      var _p12 = _p10._1;
+      var _p11 = _p10._0;
+      return _U.list([{ctor: "_Tuple2",_0: _p11 - 1,_1: _p12 - 1}
+                     ,{ctor: "_Tuple2",_0: _p11 - 1,_1: _p12}
+                     ,{ctor: "_Tuple2",_0: _p11 - 1,_1: _p12 + 1}
+                     ,{ctor: "_Tuple2",_0: _p11,_1: _p12 - 1}
+                     ,{ctor: "_Tuple2",_0: _p11,_1: _p12 + 1}
+                     ,{ctor: "_Tuple2",_0: _p11 + 1,_1: _p12 - 1}
+                     ,{ctor: "_Tuple2",_0: _p11 + 1,_1: _p12}
+                     ,{ctor: "_Tuple2",_0: _p11 + 1,_1: _p12 + 1}]);
+   };
+   var update = F2(function (_p13,model) {
+      var folder = F2(function (coord,_p14) {
+         var _p15 = _p14;
+         var _p19 = _p15._1;
+         var _p18 = _p15._0;
+         var newCell = A2($Maybe.map,
+         function (cell) {
+            return {ctor: "_Tuple2",_0: cell,_1: A3(handleCell,model.generation,coord,cell)};
+         },
+         A2($Dict.get,coord,model.generation));
+         var _p16 = newCell;
+         if (_p16.ctor === "Just") {
+               var _p17 = _p16._0._1;
+               return {ctor: "_Tuple2"
+                      ,_0: A3($Dict.insert,coord,_p17,_p18)
+                      ,_1: !_U.eq(_p16._0._0.alive,_p17.alive) ? A2($Set.union,_p19,$Set.fromList(A2($List._op["::"],coord,neighbouringCoords(coord)))) : _p19};
             } else {
-               return newModel;
+               return {ctor: "_Tuple2",_0: _p18,_1: _p19};
             }
       });
-      return A3($Set.foldr,folder,model,model.livingCells);
+      var _p20 = A3($Set.foldr,folder,{ctor: "_Tuple2",_0: model.generation,_1: $Set.empty},model.livingCells);
+      var newGen = _p20._0;
+      var newLivingCells = _p20._1;
+      return _U.update(model,{generation: newGen,livingCells: newLivingCells});
    });
    var Cell = F5(function (a,b,c,d,e) {    return {x: a,y: b,height: c,width: d,alive: e};});
    var cells = F2(function (rows,columns) {
@@ -6869,18 +6892,21 @@ Elm.Main.make = function (_elm) {
    var Model = F2(function (a,b) {    return {generation: a,livingCells: b};});
    var init = F2(function (rows,columns) {
       var cells$ = A2(cells,rows,columns);
-      var livingCells = $Set.fromList(A2($List.map,
-      $Basics.fst,
-      A2($List.filter,function (_p12) {    return function (_) {    return _.alive;}($Basics.snd(_p12));},cells$)));
+      var livingCells = $Set.fromList(A2($List.concatMap,
+      function (coord) {
+         return A2($List._op["::"],coord,neighbouringCoords(coord));
+      },
+      A2($List.map,$Basics.fst,A2($List.filter,function (_p21) {    return function (_) {    return _.alive;}($Basics.snd(_p21));},cells$))));
       return A2(Model,$Dict.fromList(cells$),A2($Debug.log,"lc",livingCells));
    });
-   var main = A2($Signal.map,view,A3($Signal.foldp,update,A2(init,70,70),$Time.fps(20)));
+   var main = A2($Signal.map,view,A3($Signal.foldp,update,A2(init,100,100),$Time.fps(20)));
    return _elm.Main.values = {_op: _op
                              ,Model: Model
                              ,Cell: Cell
                              ,init: init
                              ,cells: cells
                              ,update: update
+                             ,neighbouringCoords: neighbouringCoords
                              ,numAliveNeighbours: numAliveNeighbours
                              ,handleLivingCell: handleLivingCell
                              ,handleDeadCell: handleDeadCell

@@ -22,6 +22,7 @@ init rows columns =
       livingCells =
         List.filter (.alive << snd) cells'
           |> List.map fst
+          |> List.concatMap (\coord -> coord :: neighbouringCoords coord)
           |> Set.fromList
   in  Model (Dict.fromList cells') (Debug.log "lc" livingCells)
 
@@ -52,21 +53,33 @@ cells rows columns =
 
 update : Time -> Model -> Model
 update _ model =
-  let folder coord newModel =
+  let folder coord (newGen, newLivingCells) =
         let newCell =
               Dict.get coord model.generation
-                |> Maybe.map (handleCell model.generation coord)
+                |> Maybe.map (\cell -> (cell, handleCell model.generation coord cell))
         in case newCell of
-             (Just c) -> { newModel | generation  = Dict.insert coord c newModel.generation,
-                           livingCells = if c.alive
-                                         then Set.insert coord  newModel.livingCells
---                                         else Set.remove coord  newModel.livingCells
-                                         else newModel.livingCells
-                         }
+             (Just (old, new)) -> ( Dict.insert coord new newGen,
+                                    if old.alive /= new.alive
+                                    then Set.union newLivingCells (Set.fromList <| coord :: neighbouringCoords coord)
+                                    else newLivingCells
+--                                    else newModel.livingCells
+                                  )
 
-             Nothing  -> newModel
+             Nothing  -> (newGen, newLivingCells)
 --  in List.foldr folder model (Dict.keys model.generation)
-  in Set.foldr folder model model.livingCells
+      (newGen, newLivingCells) = Set.foldr folder (model.generation, Set.empty) model.livingCells
+  in { model | generation = newGen, livingCells = newLivingCells }
+
+neighbouringCoords : Coord -> List Coord
+neighbouringCoords (x,y) =
+  [(x - 1, y - 1),
+   (x - 1, y),
+   (x - 1, y + 1),
+   (x,     y - 1),
+   (x,     y + 1),
+   (x + 1, y - 1),
+   (x + 1, y),
+   (x + 1, y + 1)]
 
 numAliveNeighbours dict (x,y) =
   let neighbours = [(x - 1, y - 1),
@@ -120,4 +133,4 @@ cell {x, y, height, width, alive} =
 
 main : Signal Element
 main =
-  Signal.map view (Signal.foldp update (init 70 70) (Time.fps 20))
+  Signal.map view (Signal.foldp update (init 100 100) (Time.fps 20))
