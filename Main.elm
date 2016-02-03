@@ -19,7 +19,7 @@ type alias Gen   = Dict Coord Cell
 type alias Coord = (Int, Int)
 type alias Cell  = {x: Int, y: Int, height: Int, width: Int, alive: Bool}
 
-
+init : Int -> Int -> Model
 init rows columns =
   let cells'      =  cells rows columns
       livingCells =
@@ -29,6 +29,7 @@ init rows columns =
           |> Set.fromList
   in  Model (Dict.fromList cells') livingCells
 
+cells : Int -> Int -> List (Coord, Cell)
 cells rows columns =
   [0..rows]
     |> List.concatMap
@@ -36,7 +37,7 @@ cells rows columns =
             [0..columns]
               |> List.map
                  (\x ->
-                    let alive = List.member (x,y) Patterns.gliderGun
+                    let alive = List.member (x,y) Patterns.gliderGun2
                         x'     = (x * 10)  - 400
                         y'     = (-y * 10) + 400
                     in ((x, y) , (Cell x' y' 10 10 alive))))
@@ -73,10 +74,20 @@ handleCell dict coord cell =
        True  -> toggleIf (\n -> n < 2 || n > 3) cell n
        False -> toggleIf ((==) 3)               cell n
 
+toggleIf : (Int -> Bool) -> Cell -> Int -> Cell
 toggleIf pred cell n =
   if pred n
      then {cell | alive = not cell.alive}
      else cell
+
+numAliveNeighbours : Gen -> Coord -> Int
+numAliveNeighbours dict coord =
+  let neighbours = neighbouringCoords coord
+      livingStatus coord acc =
+        Dict.get coord dict
+          |> Maybe.map (\cell -> if cell.alive then (acc + 1) else acc)
+          |> withDefault acc
+  in List.foldr livingStatus 0 neighbours
 
 neighbouringCoords : Coord -> List Coord
 neighbouringCoords (x,y) =
@@ -88,14 +99,6 @@ neighbouringCoords (x,y) =
    (x + 1, y - 1),
    (x + 1, y),
    (x + 1, y + 1)]
-
-numAliveNeighbours dict coord =
-  let neighbours = neighbouringCoords coord
-      livingStatus coord acc =
-        Dict.get coord dict
-          |> Maybe.map (\cell -> if cell.alive then (acc + 1) else acc)
-          |> withDefault acc
-  in List.foldr livingStatus 0 neighbours
 
 -- VIEW
 

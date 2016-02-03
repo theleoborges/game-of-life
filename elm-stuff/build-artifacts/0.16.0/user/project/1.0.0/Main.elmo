@@ -98,7 +98,7 @@ Elm.Main.make = function (_elm) {
          function (x) {
             var y$ = (0 - y) * 10 + 400;
             var x$ = x * 10 - 400;
-            var alive = A2($List.member,{ctor: "_Tuple2",_0: x,_1: y},$Patterns.gliderGun);
+            var alive = A2($List.member,{ctor: "_Tuple2",_0: x,_1: y},$Patterns.gliderGun2);
             return {ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: x,_1: y},_1: A5(Cell,x$,y$,10,10,alive)};
          },
          _U.range(0,columns));
@@ -123,8 +123,8 @@ Elm.Main.make = function (_elm) {
                              ,advanceGeneration: advanceGeneration
                              ,handleCell: handleCell
                              ,toggleIf: toggleIf
-                             ,neighbouringCoords: neighbouringCoords
                              ,numAliveNeighbours: numAliveNeighbours
+                             ,neighbouringCoords: neighbouringCoords
                              ,view: view
                              ,cellView: cellView
                              ,main: main};

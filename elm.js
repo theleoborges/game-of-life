@@ -6716,6 +6716,22 @@ Elm.Patterns.make = function (_elm) {
                             ,{ctor: "_Tuple2",_0: 40,_1: 25}
                             ,{ctor: "_Tuple2",_0: 41,_1: 25}
                             ,{ctor: "_Tuple2",_0: 42,_1: 25}]);
+   var horizontal2 = A2($List.concatMap,
+   function (_p0) {
+      var _p1 = _p0;
+      var _p3 = _p1._1;
+      var _p2 = _p1._0;
+      return _U.list([{ctor: "_Tuple2",_0: _p2,_1: _p3},{ctor: "_Tuple2",_0: _p2 + 20,_1: _p3 + 10}]);
+   },
+   horizontal);
+   var horizontal3 = A2($List.concatMap,
+   function (_p4) {
+      var _p5 = _p4;
+      var _p7 = _p5._1;
+      var _p6 = _p5._0;
+      return _U.list([{ctor: "_Tuple2",_0: _p6,_1: _p7},{ctor: "_Tuple2",_0: _p6 + 20,_1: _p7 + 10}]);
+   },
+   horizontal2);
    var dieHard = _U.list([{ctor: "_Tuple2",_0: 19,_1: 25}
                          ,{ctor: "_Tuple2",_0: 20,_1: 25}
                          ,{ctor: "_Tuple2",_0: 20,_1: 26}
@@ -6723,6 +6739,22 @@ Elm.Patterns.make = function (_elm) {
                          ,{ctor: "_Tuple2",_0: 25,_1: 26}
                          ,{ctor: "_Tuple2",_0: 26,_1: 26}
                          ,{ctor: "_Tuple2",_0: 25,_1: 24}]);
+   var dieHard2 = A2($List.concatMap,
+   function (_p8) {
+      var _p9 = _p8;
+      var _p11 = _p9._1;
+      var _p10 = _p9._0;
+      return _U.list([{ctor: "_Tuple2",_0: _p10,_1: _p11},{ctor: "_Tuple2",_0: _p10 + 10,_1: _p11 + 10}]);
+   },
+   dieHard);
+   var dieHard3 = A2($List.concatMap,
+   function (_p12) {
+      var _p13 = _p12;
+      var _p15 = _p13._1;
+      var _p14 = _p13._0;
+      return _U.list([{ctor: "_Tuple2",_0: _p14,_1: _p15},{ctor: "_Tuple2",_0: _p14 - 10,_1: _p15 - 10}]);
+   },
+   dieHard2);
    var grower = _U.list([{ctor: "_Tuple2",_0: 20,_1: 30}
                         ,{ctor: "_Tuple2",_0: 22,_1: 30}
                         ,{ctor: "_Tuple2",_0: 22,_1: 29}
@@ -6733,6 +6765,22 @@ Elm.Patterns.make = function (_elm) {
                         ,{ctor: "_Tuple2",_0: 26,_1: 26}
                         ,{ctor: "_Tuple2",_0: 26,_1: 25}
                         ,{ctor: "_Tuple2",_0: 27,_1: 26}]);
+   var grower2 = A2($List.concatMap,
+   function (_p16) {
+      var _p17 = _p16;
+      var _p19 = _p17._1;
+      var _p18 = _p17._0;
+      return _U.list([{ctor: "_Tuple2",_0: _p18,_1: _p19},{ctor: "_Tuple2",_0: _p18 + 30,_1: _p19 + 30}]);
+   },
+   grower);
+   var grower3 = A2($List.concatMap,
+   function (_p20) {
+      var _p21 = _p20;
+      var _p23 = _p21._1;
+      var _p22 = _p21._0;
+      return _U.list([{ctor: "_Tuple2",_0: _p22,_1: _p23},{ctor: "_Tuple2",_0: _p22 - 30,_1: _p23 + 10}]);
+   },
+   grower2);
    var gliderGun = _U.list([{ctor: "_Tuple2",_0: 3,_1: 7}
                            ,{ctor: "_Tuple2",_0: 4,_1: 7}
                            ,{ctor: "_Tuple2",_0: 3,_1: 8}
@@ -6769,12 +6817,41 @@ Elm.Patterns.make = function (_elm) {
                            ,{ctor: "_Tuple2",_0: 37,_1: 6}
                            ,{ctor: "_Tuple2",_0: 38,_1: 5}
                            ,{ctor: "_Tuple2",_0: 38,_1: 6}]);
+   var gliderGun2 = A2($List.concatMap,
+   function (_p24) {
+      var _p25 = _p24;
+      var _p27 = _p25._1;
+      var _p26 = _p25._0;
+      return _U.list([{ctor: "_Tuple2",_0: _p26,_1: _p27},{ctor: "_Tuple2",_0: _p26 + 30,_1: _p27 + 30}]);
+   },
+   gliderGun);
    var glider = _U.list([{ctor: "_Tuple2",_0: 11,_1: 0}
                         ,{ctor: "_Tuple2",_0: 12,_1: 1}
                         ,{ctor: "_Tuple2",_0: 10,_1: 2}
                         ,{ctor: "_Tuple2",_0: 11,_1: 2}
                         ,{ctor: "_Tuple2",_0: 12,_1: 2}]);
-   return _elm.Patterns.values = {_op: _op,glider: glider,gliderGun: gliderGun,grower: grower,dieHard: dieHard,horizontal: horizontal};
+   var glider2 = A2($List.concatMap,
+   function (_p28) {
+      var _p29 = _p28;
+      var _p31 = _p29._1;
+      var _p30 = _p29._0;
+      return _U.list([{ctor: "_Tuple2",_0: _p30,_1: _p31},{ctor: "_Tuple2",_0: _p30 + 10,_1: _p31 + 10}]);
+   },
+   glider);
+   return _elm.Patterns.values = {_op: _op
+                                 ,glider: glider
+                                 ,gliderGun: gliderGun
+                                 ,grower: grower
+                                 ,dieHard: dieHard
+                                 ,horizontal: horizontal
+                                 ,glider2: glider2
+                                 ,grower2: grower2
+                                 ,grower3: grower3
+                                 ,dieHard2: dieHard2
+                                 ,dieHard3: dieHard3
+                                 ,gliderGun2: gliderGun2
+                                 ,horizontal2: horizontal2
+                                 ,horizontal3: horizontal3};
 };
 Elm.Utils = Elm.Utils || {};
 Elm.Utils.make = function (_elm) {
@@ -6892,7 +6969,7 @@ Elm.Main.make = function (_elm) {
          function (x) {
             var y$ = (0 - y) * 10 + 400;
             var x$ = x * 10 - 400;
-            var alive = A2($List.member,{ctor: "_Tuple2",_0: x,_1: y},$Patterns.gliderGun);
+            var alive = A2($List.member,{ctor: "_Tuple2",_0: x,_1: y},$Patterns.gliderGun2);
             return {ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: x,_1: y},_1: A5(Cell,x$,y$,10,10,alive)};
          },
          _U.range(0,columns));
@@ -6917,8 +6994,8 @@ Elm.Main.make = function (_elm) {
                              ,advanceGeneration: advanceGeneration
                              ,handleCell: handleCell
                              ,toggleIf: toggleIf
-                             ,neighbouringCoords: neighbouringCoords
                              ,numAliveNeighbours: numAliveNeighbours
+                             ,neighbouringCoords: neighbouringCoords
                              ,view: view
                              ,cellView: cellView
                              ,main: main};
