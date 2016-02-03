@@ -55,16 +55,15 @@ advanceGeneration : Gen
                     -> (Gen, List Coord)
                     -> (Gen, List Coord)
 advanceGeneration generation coord (newGen, newLivingCells) =
-        let newCell = Dict.get coord generation
-                        |> Maybe.map (ap (,) (handleCell generation coord))
-        in case newCell of
-             (Just (old, new)) -> ( Dict.insert coord new newGen,
+        let newModel (old, new) = ( Dict.insert coord new newGen,
                                     if old.alive /= new.alive
                                     then List.append newLivingCells <| coord :: neighbouringCoords coord
                                     else newLivingCells
                                   )
-
-             Nothing  -> (newGen, newLivingCells)
+         in Dict.get coord generation
+              |> Maybe.map (ap (,) (handleCell generation coord))
+              |> Maybe.map newModel
+              |> withDefault (newGen, newLivingCells)
 
 
 handleCell : Gen -> Coord -> Cell -> Cell

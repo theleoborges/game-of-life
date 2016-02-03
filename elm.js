@@ -6940,25 +6940,27 @@ Elm.Main.make = function (_elm) {
    });
    var advanceGeneration = F3(function (generation,coord,_p10) {
       var _p11 = _p10;
-      var _p15 = _p11._1;
-      var _p14 = _p11._0;
-      var newCell = A2($Maybe.map,
+      var _p16 = _p11._1;
+      var _p15 = _p11._0;
+      var newModel = function (_p12) {
+         var _p13 = _p12;
+         var _p14 = _p13._1;
+         return {ctor: "_Tuple2"
+                ,_0: A3($Dict.insert,coord,_p14,_p15)
+                ,_1: !_U.eq(_p13._0.alive,_p14.alive) ? A2($List.append,_p16,A2($List._op["::"],coord,neighbouringCoords(coord))) : _p16};
+      };
+      return A2($Maybe.withDefault,
+      {ctor: "_Tuple2",_0: _p15,_1: _p16},
+      A2($Maybe.map,
+      newModel,
+      A2($Maybe.map,
       A2($Utils.ap,F2(function (v0,v1) {    return {ctor: "_Tuple2",_0: v0,_1: v1};}),A2(handleCell,generation,coord)),
-      A2($Dict.get,coord,generation));
-      var _p12 = newCell;
-      if (_p12.ctor === "Just") {
-            var _p13 = _p12._0._1;
-            return {ctor: "_Tuple2"
-                   ,_0: A3($Dict.insert,coord,_p13,_p14)
-                   ,_1: !_U.eq(_p12._0._0.alive,_p13.alive) ? A2($List.append,_p15,A2($List._op["::"],coord,neighbouringCoords(coord))) : _p15};
-         } else {
-            return {ctor: "_Tuple2",_0: _p14,_1: _p15};
-         }
+      A2($Dict.get,coord,generation))));
    });
-   var update = F2(function (_p16,model) {
-      var _p17 = A3($Set.foldr,advanceGeneration(model.generation),{ctor: "_Tuple2",_0: model.generation,_1: _U.list([])},model.livingCells);
-      var generation$ = _p17._0;
-      var livingCells$ = _p17._1;
+   var update = F2(function (_p17,model) {
+      var _p18 = A3($Set.foldr,advanceGeneration(model.generation),{ctor: "_Tuple2",_0: model.generation,_1: _U.list([])},model.livingCells);
+      var generation$ = _p18._0;
+      var livingCells$ = _p18._1;
       return _U.update(model,{generation: generation$,livingCells: $Set.fromList(livingCells$)});
    });
    var Cell = F5(function (a,b,c,d,e) {    return {x: a,y: b,height: c,width: d,alive: e};});
@@ -6981,7 +6983,7 @@ Elm.Main.make = function (_elm) {
       var cells$ = A2(cells,rows,columns);
       var livingCells = $Set.fromList(A2($List.concatMap,
       A2($Utils.ap,F2(function (x,y) {    return A2($List._op["::"],x,y);}),neighbouringCoords),
-      A2($List.map,$Basics.fst,A2($List.filter,function (_p18) {    return function (_) {    return _.alive;}($Basics.snd(_p18));},cells$))));
+      A2($List.map,$Basics.fst,A2($List.filter,function (_p19) {    return function (_) {    return _.alive;}($Basics.snd(_p19));},cells$))));
       return A2(Model,$Dict.fromList(cells$),livingCells);
    });
    var main = A2($Signal.map,view,A3($Signal.foldp,update,A2(init,100,100),$Time.fps(20)));
