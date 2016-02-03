@@ -61,13 +61,13 @@ advanceGeneration generation coord (newGen, newLivingCells) =
                                     else newLivingCells
                                   )
          in Dict.get coord generation
-              |> Maybe.map (ap (,) (handleCell generation coord))
+              |> Maybe.map (ap (,) (updateCell generation coord))
               |> Maybe.map newModel
               |> withDefault (newGen, newLivingCells)
 
 
-handleCell : Gen -> Coord -> Cell -> Cell
-handleCell dict coord cell =
+updateCell : Gen -> Coord -> Cell -> Cell
+updateCell dict coord cell =
   let n = numAliveNeighbours dict coord
   in case cell.alive of
        True  -> toggleIf (\n -> n < 2 || n > 3) cell n
@@ -103,12 +103,12 @@ neighbouringCoords (x,y) =
 
 view : Model -> Element
 view {generation, livingCells} =
-  let cellsToRender coord cells =
+  let view' coord cells =
         case Dict.get coord generation of
           (Just cell) -> (cellView cell) :: cells
           Nothing     -> cells
   in
-    Set.foldr cellsToRender [] livingCells
+    Set.foldr view' [] livingCells
       |> collage 800 800
 
 cellView : Cell -> Form

@@ -6898,7 +6898,7 @@ Elm.Main.make = function (_elm) {
    };
    var view = function (_p2) {
       var _p3 = _p2;
-      var cellsToRender = F2(function (coord,cells) {
+      var view$ = F2(function (coord,cells) {
          var _p4 = A2($Dict.get,coord,_p3.generation);
          if (_p4.ctor === "Just") {
                return A2($List._op["::"],cellView(_p4._0),cells);
@@ -6906,7 +6906,7 @@ Elm.Main.make = function (_elm) {
                return cells;
             }
       });
-      return A3($Graphics$Collage.collage,800,800,A3($Set.foldr,cellsToRender,_U.list([]),_p3.livingCells));
+      return A3($Graphics$Collage.collage,800,800,A3($Set.foldr,view$,_U.list([]),_p3.livingCells));
    };
    var neighbouringCoords = function (_p5) {
       var _p6 = _p5;
@@ -6929,7 +6929,7 @@ Elm.Main.make = function (_elm) {
       return A3($List.foldr,livingStatus,0,neighbours);
    });
    var toggleIf = F3(function (pred,cell,n) {    return pred(n) ? _U.update(cell,{alive: $Basics.not(cell.alive)}) : cell;});
-   var handleCell = F3(function (dict,coord,cell) {
+   var updateCell = F3(function (dict,coord,cell) {
       var n = A2(numAliveNeighbours,dict,coord);
       var _p9 = cell.alive;
       if (_p9 === true) {
@@ -6954,7 +6954,7 @@ Elm.Main.make = function (_elm) {
       A2($Maybe.map,
       newModel,
       A2($Maybe.map,
-      A2($Utils.ap,F2(function (v0,v1) {    return {ctor: "_Tuple2",_0: v0,_1: v1};}),A2(handleCell,generation,coord)),
+      A2($Utils.ap,F2(function (v0,v1) {    return {ctor: "_Tuple2",_0: v0,_1: v1};}),A2(updateCell,generation,coord)),
       A2($Dict.get,coord,generation))));
    });
    var update = F2(function (_p17,model) {
@@ -6994,7 +6994,7 @@ Elm.Main.make = function (_elm) {
                              ,cells: cells
                              ,update: update
                              ,advanceGeneration: advanceGeneration
-                             ,handleCell: handleCell
+                             ,updateCell: updateCell
                              ,toggleIf: toggleIf
                              ,numAliveNeighbours: numAliveNeighbours
                              ,neighbouringCoords: neighbouringCoords
