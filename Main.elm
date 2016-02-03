@@ -93,12 +93,17 @@ handleCell dict coord cell =
 -- VIEW
 
 view : Model -> Element
-view {generation} =
-  List.map cell (Dict.values generation)
-    |> collage 800 800
+view {generation, livingCells} =
+  let folder coord cells =
+        case Dict.get coord generation of
+          (Just cell) -> (cellView cell) :: cells
+          Nothing     -> cells
+  in
+    Set.foldr folder [] livingCells
+      |> collage 800 800
 
-cell : Cell -> Form
-cell {x, y, height, width, alive} =
+cellView : Cell -> Form
+cellView {x, y, height, width, alive} =
   rect (toFloat width) (toFloat height)
     |> filled (if alive then black else white)
     |> move (toFloat x, toFloat y)
@@ -108,4 +113,4 @@ cell {x, y, height, width, alive} =
 
 main : Signal Element
 main =
-  Signal.map view (Signal.foldp update (init 100 100) (Time.fps 20))
+  Signal.map view (Signal.foldp update (init 100 100) (Time.fps 60))

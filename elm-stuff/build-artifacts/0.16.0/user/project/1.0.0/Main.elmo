@@ -18,26 +18,37 @@ Elm.Main.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $Time = Elm.Time.make(_elm);
    var _op = {};
-   var cell = function (_p0) {
+   var cellView = function (_p0) {
       var _p1 = _p0;
       return A2($Graphics$Collage.move,
       {ctor: "_Tuple2",_0: $Basics.toFloat(_p1.x),_1: $Basics.toFloat(_p1.y)},
       A2($Graphics$Collage.filled,_p1.alive ? $Color.black : $Color.white,A2($Graphics$Collage.rect,$Basics.toFloat(_p1.width),$Basics.toFloat(_p1.height))));
    };
-   var view = function (_p2) {    var _p3 = _p2;return A3($Graphics$Collage.collage,800,800,A2($List.map,cell,$Dict.values(_p3.generation)));};
+   var view = function (_p2) {
+      var _p3 = _p2;
+      var folder = F2(function (coord,cells) {
+         var _p4 = A2($Dict.get,coord,_p3.generation);
+         if (_p4.ctor === "Just") {
+               return A2($List._op["::"],cellView(_p4._0),cells);
+            } else {
+               return cells;
+            }
+      });
+      return A3($Graphics$Collage.collage,800,800,A3($Set.foldr,folder,_U.list([]),_p3.livingCells));
+   };
    var toggleIf = F3(function (pred,cell,n) {    return pred(n) ? _U.update(cell,{alive: $Basics.not(cell.alive)}) : cell;});
-   var neighbouringCoords = function (_p4) {
-      var _p5 = _p4;
-      var _p7 = _p5._1;
-      var _p6 = _p5._0;
-      return _U.list([{ctor: "_Tuple2",_0: _p6 - 1,_1: _p7 - 1}
-                     ,{ctor: "_Tuple2",_0: _p6 - 1,_1: _p7}
-                     ,{ctor: "_Tuple2",_0: _p6 - 1,_1: _p7 + 1}
-                     ,{ctor: "_Tuple2",_0: _p6,_1: _p7 - 1}
-                     ,{ctor: "_Tuple2",_0: _p6,_1: _p7 + 1}
-                     ,{ctor: "_Tuple2",_0: _p6 + 1,_1: _p7 - 1}
-                     ,{ctor: "_Tuple2",_0: _p6 + 1,_1: _p7}
-                     ,{ctor: "_Tuple2",_0: _p6 + 1,_1: _p7 + 1}]);
+   var neighbouringCoords = function (_p5) {
+      var _p6 = _p5;
+      var _p8 = _p6._1;
+      var _p7 = _p6._0;
+      return _U.list([{ctor: "_Tuple2",_0: _p7 - 1,_1: _p8 - 1}
+                     ,{ctor: "_Tuple2",_0: _p7 - 1,_1: _p8}
+                     ,{ctor: "_Tuple2",_0: _p7 - 1,_1: _p8 + 1}
+                     ,{ctor: "_Tuple2",_0: _p7,_1: _p8 - 1}
+                     ,{ctor: "_Tuple2",_0: _p7,_1: _p8 + 1}
+                     ,{ctor: "_Tuple2",_0: _p7 + 1,_1: _p8 - 1}
+                     ,{ctor: "_Tuple2",_0: _p7 + 1,_1: _p8}
+                     ,{ctor: "_Tuple2",_0: _p7 + 1,_1: _p8 + 1}]);
    };
    var numAliveNeighbours = F2(function (dict,coord) {
       var livingStatus = F2(function (coord,acc) {
@@ -48,36 +59,36 @@ Elm.Main.make = function (_elm) {
    });
    var handleCell = F3(function (dict,coord,cell) {
       var n = A2(numAliveNeighbours,dict,coord);
-      var _p8 = cell.alive;
-      if (_p8 === true) {
+      var _p9 = cell.alive;
+      if (_p9 === true) {
             return A3(toggleIf,function (n) {    return _U.cmp(n,2) < 0 || _U.cmp(n,3) > 0;},cell,n);
          } else {
             return A3(toggleIf,F2(function (x,y) {    return _U.eq(x,y);})(3),cell,n);
          }
    });
-   var update = F2(function (_p9,model) {
-      var folder = F2(function (coord,_p10) {
-         var _p11 = _p10;
-         var _p15 = _p11._1;
-         var _p14 = _p11._0;
+   var update = F2(function (_p10,model) {
+      var folder = F2(function (coord,_p11) {
+         var _p12 = _p11;
+         var _p16 = _p12._1;
+         var _p15 = _p12._0;
          var newCell = A2($Maybe.map,
          function (cell) {
             return {ctor: "_Tuple2",_0: cell,_1: A3(handleCell,model.generation,coord,cell)};
          },
          A2($Dict.get,coord,model.generation));
-         var _p12 = newCell;
-         if (_p12.ctor === "Just") {
-               var _p13 = _p12._0._1;
+         var _p13 = newCell;
+         if (_p13.ctor === "Just") {
+               var _p14 = _p13._0._1;
                return {ctor: "_Tuple2"
-                      ,_0: A3($Dict.insert,coord,_p13,_p14)
-                      ,_1: !_U.eq(_p12._0._0.alive,_p13.alive) ? A2($List.append,_p15,A2($List._op["::"],coord,neighbouringCoords(coord))) : _p15};
+                      ,_0: A3($Dict.insert,coord,_p14,_p15)
+                      ,_1: !_U.eq(_p13._0._0.alive,_p14.alive) ? A2($List.append,_p16,A2($List._op["::"],coord,neighbouringCoords(coord))) : _p16};
             } else {
-               return {ctor: "_Tuple2",_0: _p14,_1: _p15};
+               return {ctor: "_Tuple2",_0: _p15,_1: _p16};
             }
       });
-      var _p16 = A3($Set.foldr,folder,{ctor: "_Tuple2",_0: model.generation,_1: _U.list([])},model.livingCells);
-      var newGen = _p16._0;
-      var newLivingCells = _p16._1;
+      var _p17 = A3($Set.foldr,folder,{ctor: "_Tuple2",_0: model.generation,_1: _U.list([])},model.livingCells);
+      var newGen = _p17._0;
+      var newLivingCells = _p17._1;
       return _U.update(model,{generation: newGen,livingCells: $Set.fromList(newLivingCells)});
    });
    var Cell = F5(function (a,b,c,d,e) {    return {x: a,y: b,height: c,width: d,alive: e};});
@@ -102,10 +113,10 @@ Elm.Main.make = function (_elm) {
       function (coord) {
          return A2($List._op["::"],coord,neighbouringCoords(coord));
       },
-      A2($List.map,$Basics.fst,A2($List.filter,function (_p17) {    return function (_) {    return _.alive;}($Basics.snd(_p17));},cells$))));
+      A2($List.map,$Basics.fst,A2($List.filter,function (_p18) {    return function (_) {    return _.alive;}($Basics.snd(_p18));},cells$))));
       return A2(Model,$Dict.fromList(cells$),livingCells);
    });
-   var main = A2($Signal.map,view,A3($Signal.foldp,update,A2(init,100,100),$Time.fps(20)));
+   var main = A2($Signal.map,view,A3($Signal.foldp,update,A2(init,100,100),$Time.fps(60)));
    return _elm.Main.values = {_op: _op
                              ,Model: Model
                              ,Cell: Cell
@@ -117,6 +128,6 @@ Elm.Main.make = function (_elm) {
                              ,toggleIf: toggleIf
                              ,handleCell: handleCell
                              ,view: view
-                             ,cell: cell
+                             ,cellView: cellView
                              ,main: main};
 };
