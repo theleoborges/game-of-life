@@ -18,24 +18,26 @@ import Signal exposing (Address)
 -- MODEL
 
 type alias Model = { generation  : Gen,
-                     livingCells : Set Coord}
+                     livingCells : Set Coord,
+                     config      : Config}
 
 type alias Gen     = Dict Coord Cell
 type alias Coord   = (Int, Int)
 type alias Cell    = {x: Int, y: Int, height: Int, width: Int, alive: Bool}
+type alias Config  = {rows: Int, columns: Int, height: Float, width: Float}
 
-init : Int -> Int -> Pattern -> Model
-init rows columns pattern =
-  let cells'      =  cells rows columns pattern
+init : Config -> Pattern -> Model
+init config pattern =
+  let cells'      =  cells config pattern
       livingCells =
         List.filter (.alive << snd) cells'
           |> List.map fst
           |> List.concatMap (ap (::) neighbouringCoords)
           |> Set.fromList
-  in  Model (Dict.fromList cells') livingCells
+  in  Model (Dict.fromList cells') livingCells config
 
-cells : Int -> Int -> Pattern -> List (Coord, Cell)
-cells rows columns pattern =
+cells : Config -> Pattern -> List (Coord, Cell)
+cells {rows, columns, height, width} pattern =
   [0..rows]
     |> List.concatMap
          (\y ->
@@ -43,8 +45,8 @@ cells rows columns pattern =
               |> List.map
                  (\x ->
                     let alive = List.member (x,y) pattern
-                        x'     = (x * 10)  - 400
-                        y'     = (-y * 10) + 400
+                        x'     = (x * 10)  - (round (width / 2))
+                        y'     = (-y * 10) + (round (height / 2))
                     in ((x, y) , (Cell x' y' 10 10 alive))))
 
 -- UPDATE
@@ -63,7 +65,7 @@ update action model =
       in { model | generation  = generation',
                    livingCells = Set.fromList livingCells' }
 
-    (Restart name) -> (init 100 100 <| getPattern name)
+    (Restart name) -> (init model.config <| getPattern name)
 
 advanceGeneration : Gen
                     -> Coord
@@ -117,13 +119,13 @@ neighbouringCoords (x,y) =
 -- VIEW
 
 view : Address Action -> Model -> Node
-view address {generation, livingCells} =
+view address {generation, livingCells, config} =
   let view' coord cells =
         Dict.get coord generation
           |> Maybe.map ((flip (::) cells) << cellView)
           |> withDefault cells
       grid = Set.foldr view' [] livingCells
-               |> collage 800 800
+               |> collage (round config.width) (round config.height)
                |> fromElement
   in
     div []
@@ -142,19 +144,19 @@ options address =
 radio : Address Action -> String -> List Html
 radio address key =
   [ input [type' "radio",
-         name  "pattern",
-         value key,
-         on    "change" targetChecked (\_ -> Signal.message address (Restart key))
-        ]
-        []
+           name  "pattern",
+           value key,
+           on    "change" targetChecked (\_ -> Signal.message address (Restart key))
+          ]
+          []
   , text key
   ]
 
 -- MAIN
 
-main : Signal Node
+main : Signal Html
 main =
   let actions      = Signal.mailbox AdvanceGeneration
       tick         = Signal.map (always AdvanceGeneration) (Time.fps 20)
-      initialModel = init 100 100 Patterns.gliderGun2
+      initialModel = init (Config 100 100 800 800) Patterns.gliderGun2
   in Signal.map (view actions.address) (Signal.foldp update initialModel (Signal.merge tick actions.signal))

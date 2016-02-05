@@ -10788,6 +10788,7 @@ Elm.Main.make = function (_elm) {
    var options = function (address) {    return A2($List.concatMap,radio(address),_U.list(["glider","gliderGun","grower","dieHard","horizontal"]));};
    var view = F2(function (address,_p15) {
       var _p16 = _p15;
+      var _p18 = _p16.config;
       var view$ = F2(function (coord,cells) {
          return A2($Maybe.withDefault,
          cells,
@@ -10797,52 +10798,59 @@ Elm.Main.make = function (_elm) {
          },
          A2($Dict.get,coord,_p16.generation)));
       });
-      var grid = $Html.fromElement(A3($Graphics$Collage.collage,800,800,A3($Set.foldr,view$,_U.list([]),_p16.livingCells)));
+      var grid = $Html.fromElement(A3($Graphics$Collage.collage,
+      $Basics.round(_p18.width),
+      $Basics.round(_p18.height),
+      A3($Set.foldr,view$,_U.list([]),_p16.livingCells)));
       return A2($Html.div,_U.list([]),A2($Basics._op["++"],options(address),_U.list([grid])));
    });
    var AdvanceGeneration = {ctor: "AdvanceGeneration"};
+   var Config = F4(function (a,b,c,d) {    return {rows: a,columns: b,height: c,width: d};});
    var Cell = F5(function (a,b,c,d,e) {    return {x: a,y: b,height: c,width: d,alive: e};});
-   var cells = F3(function (rows,columns,pattern) {
+   var cells = F2(function (_p19,pattern) {
+      var _p20 = _p19;
       return A2($List.concatMap,
       function (y) {
          return A2($List.map,
          function (x) {
-            var y$ = (0 - y) * 10 + 400;
-            var x$ = x * 10 - 400;
+            var y$ = (0 - y) * 10 + $Basics.round(_p20.height / 2);
+            var x$ = x * 10 - $Basics.round(_p20.width / 2);
             var alive = A2($List.member,{ctor: "_Tuple2",_0: x,_1: y},pattern);
             return {ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: x,_1: y},_1: A5(Cell,x$,y$,10,10,alive)};
          },
-         _U.range(0,columns));
+         _U.range(0,_p20.columns));
       },
-      _U.range(0,rows));
+      _U.range(0,_p20.rows));
    });
-   var Model = F2(function (a,b) {    return {generation: a,livingCells: b};});
-   var init = F3(function (rows,columns,pattern) {
-      var cells$ = A3(cells,rows,columns,pattern);
+   var Model = F3(function (a,b,c) {    return {generation: a,livingCells: b,config: c};});
+   var init = F2(function (config,pattern) {
+      var cells$ = A2(cells,config,pattern);
       var livingCells = $Set.fromList(A2($List.concatMap,
       A2($Utils.ap,F2(function (x,y) {    return A2($List._op["::"],x,y);}),neighbouringCoords),
-      A2($List.map,$Basics.fst,A2($List.filter,function (_p18) {    return function (_) {    return _.alive;}($Basics.snd(_p18));},cells$))));
-      return A2(Model,$Dict.fromList(cells$),livingCells);
+      A2($List.map,$Basics.fst,A2($List.filter,function (_p21) {    return function (_) {    return _.alive;}($Basics.snd(_p21));},cells$))));
+      return A3(Model,$Dict.fromList(cells$),livingCells,config);
    });
    var update = F2(function (action,model) {
-      var _p19 = action;
-      if (_p19.ctor === "AdvanceGeneration") {
-            var _p20 = A3($Set.foldr,advanceGeneration(model.generation),{ctor: "_Tuple2",_0: model.generation,_1: _U.list([])},model.livingCells);
-            var generation$ = _p20._0;
-            var livingCells$ = _p20._1;
+      var _p22 = action;
+      if (_p22.ctor === "AdvanceGeneration") {
+            var _p23 = A3($Set.foldr,advanceGeneration(model.generation),{ctor: "_Tuple2",_0: model.generation,_1: _U.list([])},model.livingCells);
+            var generation$ = _p23._0;
+            var livingCells$ = _p23._1;
             return _U.update(model,{generation: generation$,livingCells: $Set.fromList(livingCells$)});
          } else {
-            return A3(init,100,100,$Patterns.getPattern(_p19._0));
+            return A2(init,model.config,$Patterns.getPattern(_p22._0));
          }
    });
    var main = function () {
+      var initialModel = A2(init,A4(Config,100,100,800,800),$Patterns.gliderGun2);
       var tick = A2($Signal.map,$Basics.always(AdvanceGeneration),$Time.fps(20));
       var actions = $Signal.mailbox(AdvanceGeneration);
-      return A2($Signal.map,view(actions.address),A3($Signal.foldp,update,A3(init,100,100,$Patterns.gliderGun2),A2($Signal.merge,tick,actions.signal)));
+      return A2($Signal.map,view(actions.address),A3($Signal.foldp,update,initialModel,A2($Signal.merge,tick,actions.signal)));
    }();
    return _elm.Main.values = {_op: _op
                              ,Model: Model
                              ,Cell: Cell
+                             ,Config: Config
                              ,init: init
                              ,cells: cells
                              ,AdvanceGeneration: AdvanceGeneration
