@@ -10781,7 +10781,12 @@ Elm.Main.make = function (_elm) {
                      _U.list([$Html$Attributes.type$("radio")
                              ,$Html$Attributes.name("pattern")
                              ,$Html$Attributes.value(key)
-                             ,A3($Html$Events.on,"change",$Html$Events.targetChecked,function (_p14) {    return A2($Signal.message,address,Restart(key));})]),
+                             ,A3($Html$Events.on,
+                             "change",
+                             $Html$Events.targetChecked,
+                             function (_p14) {
+                                return A2($Signal.message,address,Restart($Patterns.getPattern(key)));
+                             })]),
                      _U.list([]))
                      ,$Html.text(key)]);
    });
@@ -10838,7 +10843,7 @@ Elm.Main.make = function (_elm) {
             var livingCells$ = _p23._1;
             return _U.update(model,{generation: generation$,livingCells: $Set.fromList(livingCells$)});
          } else {
-            return A2(init,model.config,$Patterns.getPattern(_p22._0));
+            return A2(init,model.config,_p22._0);
          }
    });
    var main = function () {

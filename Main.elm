@@ -53,7 +53,6 @@ cells {rows, columns, height, width} pattern =
 type Action = AdvanceGeneration
             | Restart PatternName
 
-
 type alias PatternName = String
 
 update : Action -> Model -> Model
@@ -72,14 +71,14 @@ advanceGeneration : Gen
                     -> (Gen, List Coord)
                     -> (Gen, List Coord)
 advanceGeneration generation coord (newGen, newLivingCells) =
-        let newModel (old, new) = ( Dict.insert coord new newGen,
-                                    if old.alive /= new.alive
-                                    then List.append newLivingCells <| coord :: neighbouringCoords coord
-                                    else newLivingCells
-                                  )
+        let updateModel (old, new) = ( Dict.insert coord new newGen,
+                                       if old.alive /= new.alive
+                                       then List.append newLivingCells <| coord :: neighbouringCoords coord
+                                       else newLivingCells
+                                     )
          in Dict.get coord generation
               |> Maybe.map (ap (,) (updateCell generation coord))
-              |> Maybe.map newModel
+              |> Maybe.map updateModel
               |> withDefault (newGen, newLivingCells)
 
 
@@ -146,7 +145,7 @@ radio address key =
   [ input [type' "radio",
            name  "pattern",
            value key,
-           on    "change" targetChecked (\_ -> Signal.message address (Restart key))
+           on    "change" targetChecked (\_ -> Signal.message address <| Restart key)
           ]
           []
   , text key

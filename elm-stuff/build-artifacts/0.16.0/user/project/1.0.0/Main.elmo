@@ -62,7 +62,7 @@ Elm.Main.make = function (_elm) {
       var _p8 = _p7;
       var _p13 = _p8._1;
       var _p12 = _p8._0;
-      var newModel = function (_p9) {
+      var updateModel = function (_p9) {
          var _p10 = _p9;
          var _p11 = _p10._1;
          return {ctor: "_Tuple2"
@@ -72,7 +72,7 @@ Elm.Main.make = function (_elm) {
       return A2($Maybe.withDefault,
       {ctor: "_Tuple2",_0: _p12,_1: _p13},
       A2($Maybe.map,
-      newModel,
+      updateModel,
       A2($Maybe.map,
       A2($Utils.ap,F2(function (v0,v1) {    return {ctor: "_Tuple2",_0: v0,_1: v1};}),A2(updateCell,generation,coord)),
       A2($Dict.get,coord,generation))));
