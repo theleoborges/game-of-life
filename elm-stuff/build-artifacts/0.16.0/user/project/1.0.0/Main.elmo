@@ -111,36 +111,34 @@ Elm.Main.make = function (_elm) {
    var Cell = F5(function (a,b,c,d,e) {    return {x: a,y: b,height: c,width: d,alive: e};});
    var cells = F2(function (_p19,pattern) {
       var _p20 = _p19;
-      return A2($List.concatMap,
-      function (y) {
-         return A2($List.map,
-         function (x) {
-            var y$ = (0 - y) * 10 + $Basics.round(_p20.height / 2);
-            var x$ = x * 10 - $Basics.round(_p20.width / 2);
-            var alive = A2($List.member,{ctor: "_Tuple2",_0: x,_1: y},pattern);
-            return {ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: x,_1: y},_1: A5(Cell,x$,y$,10,10,alive)};
-         },
-         _U.range(0,_p20.columns));
-      },
-      _U.range(0,_p20.rows));
+      var makeCell = function (_p21) {
+         var _p22 = _p21;
+         var _p24 = _p22._1;
+         var _p23 = _p22._0;
+         var y$ = (0 - _p24) * 10 + $Basics.round(_p20.height / 2);
+         var x$ = _p23 * 10 - $Basics.round(_p20.width / 2);
+         var alive = A2($List.member,{ctor: "_Tuple2",_0: _p23,_1: _p24},pattern);
+         return {ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: _p23,_1: _p24},_1: A5(Cell,x$,y$,10,10,alive)};
+      };
+      return A2($List.map,makeCell,A2($Utils.grid2d,_p20.rows,_p20.columns));
    });
    var Model = F3(function (a,b,c) {    return {generation: a,livingCells: b,config: c};});
    var init = F2(function (config,pattern) {
       var cells$ = A2(cells,config,pattern);
       var livingCells = $Set.fromList(A2($List.concatMap,
       A2($Utils.ap,F2(function (x,y) {    return A2($List._op["::"],x,y);}),neighbouringCoords),
-      A2($List.map,$Basics.fst,A2($List.filter,function (_p21) {    return function (_) {    return _.alive;}($Basics.snd(_p21));},cells$))));
+      A2($List.map,$Basics.fst,A2($List.filter,function (_p25) {    return function (_) {    return _.alive;}($Basics.snd(_p25));},cells$))));
       return A3(Model,$Dict.fromList(cells$),livingCells,config);
    });
    var update = F2(function (action,model) {
-      var _p22 = action;
-      if (_p22.ctor === "AdvanceGeneration") {
-            var _p23 = A3($Set.foldr,advanceGeneration(model.generation),{ctor: "_Tuple2",_0: model.generation,_1: _U.list([])},model.livingCells);
-            var generation$ = _p23._0;
-            var livingCells$ = _p23._1;
+      var _p26 = action;
+      if (_p26.ctor === "AdvanceGeneration") {
+            var _p27 = A3($Set.foldr,advanceGeneration(model.generation),{ctor: "_Tuple2",_0: model.generation,_1: _U.list([])},model.livingCells);
+            var generation$ = _p27._0;
+            var livingCells$ = _p27._1;
             return _U.update(model,{generation: generation$,livingCells: $Set.fromList(livingCells$)});
          } else {
-            return A2(init,model.config,$Patterns.getPattern(_p22._0));
+            return A2(init,model.config,$Patterns.getPattern(_p26._0));
          }
    });
    var main = function () {

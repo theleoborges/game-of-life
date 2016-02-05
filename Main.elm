@@ -1,19 +1,19 @@
 module Main where
 
-import Color exposing (..)
+import Color            exposing (..)
 import Graphics.Collage exposing (collage, move, filled, Form, rect)
 import Graphics.Element exposing (..)
-import Time exposing (Time)
-import Dict exposing (Dict)
-import Maybe exposing (withDefault)
-import Set exposing (Set)
-import Patterns exposing (Pattern, getPattern)
-import Utils exposing (ap)
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (on, targetChecked)
-import VirtualDom exposing (Node)
-import Signal exposing (Address)
+import Time             exposing (Time)
+import Dict             exposing (Dict)
+import Maybe            exposing (withDefault)
+import Set              exposing (Set)
+import Patterns         exposing (Pattern, getPattern)
+import Utils            exposing (ap, grid2d)
+import Html             exposing (..)
+import Html.Attributes  exposing (..)
+import Html.Events      exposing (on, targetChecked)
+import VirtualDom       exposing (Node)
+import Signal           exposing (Address)
 
 -- MODEL
 
@@ -38,16 +38,15 @@ init config pattern =
 
 cells : Config -> Pattern -> List (Coord, Cell)
 cells {rows, columns, height, width} pattern =
-  [0..rows]
-    |> List.concatMap
-         (\y ->
-            [0..columns]
-              |> List.map
-                 (\x ->
-                    let alive = List.member (x,y) pattern
-                        x'     = (x * 10)  - (round (width / 2))
-                        y'     = (-y * 10) + (round (height / 2))
-                    in ((x, y) , (Cell x' y' 10 10 alive))))
+  let makeCell (x, y) =
+        let alive = List.member (x,y) pattern
+            x'     = (x * 10)  - (round (width / 2))
+            y'     = (-y * 10) + (round (height / 2))
+        in ((x, y) , (Cell x' y' 10 10 alive))
+  in grid2d rows columns
+       |> List.map makeCell
+
+
 
 -- UPDATE
 type Action = AdvanceGeneration

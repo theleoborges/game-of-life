@@ -10760,7 +10760,7 @@ Elm.Main.make = function (_elm) {
       var _p8 = _p7;
       var _p13 = _p8._1;
       var _p12 = _p8._0;
-      var newModel = function (_p9) {
+      var updateModel = function (_p9) {
          var _p10 = _p9;
          var _p11 = _p10._1;
          return {ctor: "_Tuple2"
@@ -10770,7 +10770,7 @@ Elm.Main.make = function (_elm) {
       return A2($Maybe.withDefault,
       {ctor: "_Tuple2",_0: _p12,_1: _p13},
       A2($Maybe.map,
-      newModel,
+      updateModel,
       A2($Maybe.map,
       A2($Utils.ap,F2(function (v0,v1) {    return {ctor: "_Tuple2",_0: v0,_1: v1};}),A2(updateCell,generation,coord)),
       A2($Dict.get,coord,generation))));
@@ -10781,12 +10781,7 @@ Elm.Main.make = function (_elm) {
                      _U.list([$Html$Attributes.type$("radio")
                              ,$Html$Attributes.name("pattern")
                              ,$Html$Attributes.value(key)
-                             ,A3($Html$Events.on,
-                             "change",
-                             $Html$Events.targetChecked,
-                             function (_p14) {
-                                return A2($Signal.message,address,Restart($Patterns.getPattern(key)));
-                             })]),
+                             ,A3($Html$Events.on,"change",$Html$Events.targetChecked,function (_p14) {    return A2($Signal.message,address,Restart(key));})]),
                      _U.list([]))
                      ,$Html.text(key)]);
    });
@@ -10810,40 +10805,46 @@ Elm.Main.make = function (_elm) {
       return A2($Html.div,_U.list([]),A2($Basics._op["++"],options(address),_U.list([grid])));
    });
    var AdvanceGeneration = {ctor: "AdvanceGeneration"};
+   var grid2d = F2(function (rows,columns) {
+      return A2($List.concatMap,
+      function (y) {
+         return A2($List.map,function (x) {    return {ctor: "_Tuple2",_0: x,_1: y};},_U.range(0,columns));
+      },
+      _U.range(0,rows));
+   });
    var Config = F4(function (a,b,c,d) {    return {rows: a,columns: b,height: c,width: d};});
    var Cell = F5(function (a,b,c,d,e) {    return {x: a,y: b,height: c,width: d,alive: e};});
    var cells = F2(function (_p19,pattern) {
       var _p20 = _p19;
-      return A2($List.concatMap,
-      function (y) {
-         return A2($List.map,
-         function (x) {
-            var y$ = (0 - y) * 10 + $Basics.round(_p20.height / 2);
-            var x$ = x * 10 - $Basics.round(_p20.width / 2);
-            var alive = A2($List.member,{ctor: "_Tuple2",_0: x,_1: y},pattern);
-            return {ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: x,_1: y},_1: A5(Cell,x$,y$,10,10,alive)};
-         },
-         _U.range(0,_p20.columns));
+      return A2($List.map,
+      function (_p21) {
+         var _p22 = _p21;
+         var _p24 = _p22._1;
+         var _p23 = _p22._0;
+         var y$ = (0 - _p24) * 10 + $Basics.round(_p20.height / 2);
+         var x$ = _p23 * 10 - $Basics.round(_p20.width / 2);
+         var alive = A2($List.member,{ctor: "_Tuple2",_0: _p23,_1: _p24},pattern);
+         return {ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: _p23,_1: _p24},_1: A5(Cell,x$,y$,10,10,alive)};
       },
-      _U.range(0,_p20.rows));
+      A2(grid2d,_p20.rows,_p20.columns));
    });
    var Model = F3(function (a,b,c) {    return {generation: a,livingCells: b,config: c};});
    var init = F2(function (config,pattern) {
       var cells$ = A2(cells,config,pattern);
       var livingCells = $Set.fromList(A2($List.concatMap,
       A2($Utils.ap,F2(function (x,y) {    return A2($List._op["::"],x,y);}),neighbouringCoords),
-      A2($List.map,$Basics.fst,A2($List.filter,function (_p21) {    return function (_) {    return _.alive;}($Basics.snd(_p21));},cells$))));
+      A2($List.map,$Basics.fst,A2($List.filter,function (_p25) {    return function (_) {    return _.alive;}($Basics.snd(_p25));},cells$))));
       return A3(Model,$Dict.fromList(cells$),livingCells,config);
    });
    var update = F2(function (action,model) {
-      var _p22 = action;
-      if (_p22.ctor === "AdvanceGeneration") {
-            var _p23 = A3($Set.foldr,advanceGeneration(model.generation),{ctor: "_Tuple2",_0: model.generation,_1: _U.list([])},model.livingCells);
-            var generation$ = _p23._0;
-            var livingCells$ = _p23._1;
+      var _p26 = action;
+      if (_p26.ctor === "AdvanceGeneration") {
+            var _p27 = A3($Set.foldr,advanceGeneration(model.generation),{ctor: "_Tuple2",_0: model.generation,_1: _U.list([])},model.livingCells);
+            var generation$ = _p27._0;
+            var livingCells$ = _p27._1;
             return _U.update(model,{generation: generation$,livingCells: $Set.fromList(livingCells$)});
          } else {
-            return A2(init,model.config,_p22._0);
+            return A2(init,model.config,$Patterns.getPattern(_p26._0));
          }
    });
    var main = function () {
@@ -10857,6 +10858,7 @@ Elm.Main.make = function (_elm) {
                              ,Cell: Cell
                              ,Config: Config
                              ,init: init
+                             ,grid2d: grid2d
                              ,cells: cells
                              ,AdvanceGeneration: AdvanceGeneration
                              ,Restart: Restart

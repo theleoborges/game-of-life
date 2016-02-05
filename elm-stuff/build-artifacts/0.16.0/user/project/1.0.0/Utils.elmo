@@ -11,6 +11,13 @@ Elm.Utils.make = function (_elm) {
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
+   var grid2d = F2(function (rows,columns) {
+      return A2($List.concatMap,
+      function (y) {
+         return A2($List.map,function (x) {    return {ctor: "_Tuple2",_0: x,_1: y};},_U.range(0,columns));
+      },
+      _U.range(0,rows));
+   });
    var ap = F3(function (f,g,a) {    return A2(f,a,g(a));});
-   return _elm.Utils.values = {_op: _op,ap: ap};
+   return _elm.Utils.values = {_op: _op,ap: ap,grid2d: grid2d};
 };
