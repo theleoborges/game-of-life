@@ -160,6 +160,16 @@ Elm.Patterns.make = function (_elm) {
       return _U.list([{ctor: "_Tuple2",_0: _p30,_1: _p31},{ctor: "_Tuple2",_0: _p30 + 10,_1: _p31 + 10}]);
    },
    glider);
+   var getPattern = function (name) {
+      var _p32 = name;
+      switch (_p32)
+      {case "glider": return glider;
+         case "gliderGun": return gliderGun;
+         case "grower": return grower;
+         case "dieHard": return dieHard;
+         case "horizontal": return horizontal;
+         default: return glider;}
+   };
    return _elm.Patterns.values = {_op: _op
                                  ,glider: glider
                                  ,gliderGun: gliderGun
@@ -173,5 +183,6 @@ Elm.Patterns.make = function (_elm) {
                                  ,dieHard3: dieHard3
                                  ,gliderGun2: gliderGun2
                                  ,horizontal2: horizontal2
-                                 ,horizontal3: horizontal3};
+                                 ,horizontal3: horizontal3
+                                 ,getPattern: getPattern};
 };

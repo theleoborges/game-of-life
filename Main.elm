@@ -1,27 +1,32 @@
 module Main where
 
 import Color exposing (..)
-import Graphics.Collage exposing (..)
+import Graphics.Collage exposing (collage, move, filled, Form, rect)
 import Graphics.Element exposing (..)
 import Time exposing (Time)
 import Dict exposing (Dict)
 import Maybe exposing (withDefault)
 import Set exposing (Set)
-import Patterns
+import Patterns exposing (Pattern, getPattern)
 import Utils exposing (ap)
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (on, targetChecked)
+import VirtualDom exposing (Node)
+import Signal exposing (Address)
 
 -- MODEL
 
 type alias Model = { generation  : Gen,
                      livingCells : Set Coord}
 
-type alias Gen   = Dict Coord Cell
-type alias Coord = (Int, Int)
-type alias Cell  = {x: Int, y: Int, height: Int, width: Int, alive: Bool}
+type alias Gen     = Dict Coord Cell
+type alias Coord   = (Int, Int)
+type alias Cell    = {x: Int, y: Int, height: Int, width: Int, alive: Bool}
 
-init : Int -> Int -> Model
-init rows columns =
-  let cells'      =  cells rows columns
+init : Int -> Int -> Pattern -> Model
+init rows columns pattern =
+  let cells'      =  cells rows columns pattern
       livingCells =
         List.filter (.alive << snd) cells'
           |> List.map fst
@@ -29,26 +34,36 @@ init rows columns =
           |> Set.fromList
   in  Model (Dict.fromList cells') livingCells
 
-cells : Int -> Int -> List (Coord, Cell)
-cells rows columns =
+cells : Int -> Int -> Pattern -> List (Coord, Cell)
+cells rows columns pattern =
   [0..rows]
     |> List.concatMap
          (\y ->
             [0..columns]
               |> List.map
                  (\x ->
-                    let alive = List.member (x,y) Patterns.gliderGun2
+                    let alive = List.member (x,y) pattern
                         x'     = (x * 10)  - 400
                         y'     = (-y * 10) + 400
                     in ((x, y) , (Cell x' y' 10 10 alive))))
 
 -- UPDATE
-update : Time -> Model -> Model
-update _ model =
-  let (generation', livingCells') =
-        Set.foldr (advanceGeneration model.generation) (model.generation, []) model.livingCells
-  in { model | generation  = generation',
-               livingCells = Set.fromList livingCells' }
+type Action = AdvanceGeneration
+            | Restart PatternName
+
+
+type alias PatternName = String
+
+update : Action -> Model -> Model
+update action model =
+  case action of
+    AdvanceGeneration ->
+      let (generation', livingCells') =
+            Set.foldr (advanceGeneration model.generation) (model.generation, []) model.livingCells
+      in { model | generation  = generation',
+                   livingCells = Set.fromList livingCells' }
+
+    (Restart name) -> (init 100 100 <| getPattern name)
 
 advanceGeneration : Gen
                     -> Coord
@@ -101,15 +116,18 @@ neighbouringCoords (x,y) =
 
 -- VIEW
 
-view : Model -> Element
-view {generation, livingCells} =
+view : Address Action -> Model -> Node
+view address {generation, livingCells} =
   let view' coord cells =
-        case Dict.get coord generation of
-          (Just cell) -> (cellView cell) :: cells
-          Nothing     -> cells
+        Dict.get coord generation
+          |> Maybe.map ((flip (::) cells) << cellView)
+          |> withDefault cells
+      grid = Set.foldr view' [] livingCells
+               |> collage 800 800
+               |> fromElement
   in
-    Set.foldr view' [] livingCells
-      |> collage 800 800
+    div []
+      <| (options address) ++ [grid]
 
 cellView : Cell -> Form
 cellView {x, y, height, width, alive} =
@@ -117,9 +135,26 @@ cellView {x, y, height, width, alive} =
     |> filled (if alive then black else white)
     |> move (toFloat x, toFloat y)
 
+options : Address Action -> List Html
+options address =
+  List.concatMap (radio address) ["glider", "gliderGun", "grower", "dieHard", "horizontal"]
+
+radio : Address Action -> String -> List Html
+radio address key =
+  [ input [type' "radio",
+         name  "pattern",
+         value key,
+         on    "change" targetChecked (\_ -> Signal.message address (Restart key))
+        ]
+        []
+  , text key
+  ]
 
 -- MAIN
 
-main : Signal Element
+main : Signal Node
 main =
-  Signal.map view (Signal.foldp update (init 100 100) (Time.fps 20))
+  let actions      = Signal.mailbox AdvanceGeneration
+      tick         = Signal.map (always AdvanceGeneration) (Time.fps 20)
+      initialModel = init 100 100 Patterns.gliderGun2
+  in Signal.map (view actions.address) (Signal.foldp update initialModel (Signal.merge tick actions.signal))
