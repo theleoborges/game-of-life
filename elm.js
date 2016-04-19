@@ -10693,8 +10693,15 @@ Elm.Utils.make = function (_elm) {
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
+   var grid2d = F2(function (rows,columns) {
+      return A2($List.concatMap,
+      function (y) {
+         return A2($List.map,function (x) {    return {ctor: "_Tuple2",_0: x,_1: y};},_U.range(0,columns));
+      },
+      _U.range(0,rows));
+   });
    var ap = F3(function (f,g,a) {    return A2(f,a,g(a));});
-   return _elm.Utils.values = {_op: _op,ap: ap};
+   return _elm.Utils.values = {_op: _op,ap: ap,grid2d: grid2d};
 };
 Elm.Main = Elm.Main || {};
 Elm.Main.make = function (_elm) {
@@ -10805,19 +10812,11 @@ Elm.Main.make = function (_elm) {
       return A2($Html.div,_U.list([]),A2($Basics._op["++"],options(address),_U.list([grid])));
    });
    var AdvanceGeneration = {ctor: "AdvanceGeneration"};
-   var grid2d = F2(function (rows,columns) {
-      return A2($List.concatMap,
-      function (y) {
-         return A2($List.map,function (x) {    return {ctor: "_Tuple2",_0: x,_1: y};},_U.range(0,columns));
-      },
-      _U.range(0,rows));
-   });
    var Config = F4(function (a,b,c,d) {    return {rows: a,columns: b,height: c,width: d};});
    var Cell = F5(function (a,b,c,d,e) {    return {x: a,y: b,height: c,width: d,alive: e};});
    var cells = F2(function (_p19,pattern) {
       var _p20 = _p19;
-      return A2($List.map,
-      function (_p21) {
+      var makeCell = function (_p21) {
          var _p22 = _p21;
          var _p24 = _p22._1;
          var _p23 = _p22._0;
@@ -10825,8 +10824,8 @@ Elm.Main.make = function (_elm) {
          var x$ = _p23 * 10 - $Basics.round(_p20.width / 2);
          var alive = A2($List.member,{ctor: "_Tuple2",_0: _p23,_1: _p24},pattern);
          return {ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: _p23,_1: _p24},_1: A5(Cell,x$,y$,10,10,alive)};
-      },
-      A2(grid2d,_p20.rows,_p20.columns));
+      };
+      return A2($List.map,makeCell,A2($Utils.grid2d,_p20.rows,_p20.columns));
    });
    var Model = F3(function (a,b,c) {    return {generation: a,livingCells: b,config: c};});
    var init = F2(function (config,pattern) {
@@ -10858,7 +10857,6 @@ Elm.Main.make = function (_elm) {
                              ,Cell: Cell
                              ,Config: Config
                              ,init: init
-                             ,grid2d: grid2d
                              ,cells: cells
                              ,AdvanceGeneration: AdvanceGeneration
                              ,Restart: Restart

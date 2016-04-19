@@ -63,7 +63,7 @@ update action model =
       in { model | generation  = generation',
                    livingCells = Set.fromList livingCells' }
 
-    (Restart name) -> (init model.config <| getPattern name)
+    (Restart name) -> init model.config <| getPattern name
 
 advanceGeneration : Gen
                     -> Coord
