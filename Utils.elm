@@ -1,4 +1,4 @@
-module Utils where
+module Utils exposing (..)
 
 ap : (a -> b -> c)
       -> (a -> b)

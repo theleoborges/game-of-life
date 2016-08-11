@@ -1,4 +1,4 @@
-module Patterns where
+module Patterns exposing (..)
 
 type alias Pattern = List ( Int, Int )
 

@@ -1,8 +1,8 @@
-module Main where
+module Main exposing (..)
 
 import Color            exposing (..)
-import Graphics.Collage exposing (collage, move, filled, Form, rect)
-import Graphics.Element exposing (..)
+import Collage          exposing (collage, move, filled, Form, rect)
+import Element          exposing (..)
 import Time             exposing (Time)
 import Dict             exposing (Dict)
 import Maybe            exposing (withDefault)
@@ -10,10 +10,12 @@ import Set              exposing (Set)
 import Patterns         exposing (Pattern, getPattern)
 import Utils            exposing (ap, grid2d)
 import Html             exposing (..)
+import Html.App         exposing (..)
 import Html.Attributes  exposing (..)
 import Html.Events      exposing (on, targetChecked)
 import VirtualDom       exposing (Node)
-import Signal           exposing (Address)
+import Json.Decode      as Json
+import AnimationFrame   exposing (..)
 
 -- MODEL
 
@@ -116,18 +118,18 @@ neighbouringCoords (x,y) =
 
 -- VIEW
 
-view : Address Action -> Model -> Node
-view address {generation, livingCells, config} =
+view : Model -> Node Action
+view {generation, livingCells, config} =
   let view' coord cells =
         Dict.get coord generation
           |> Maybe.map ((flip (::) cells) << cellView)
           |> withDefault cells
       grid = Set.foldr view' [] livingCells
                |> collage (round config.width) (round config.height)
-               |> fromElement
+               |> toHtml
   in
     div []
-      <| (options address) ++ [grid]
+      <| options ++ [grid]
 
 cellView : Cell -> Form
 cellView {x, y, height, width, alive} =
@@ -135,16 +137,16 @@ cellView {x, y, height, width, alive} =
     |> filled (if alive then black else white)
     |> move (toFloat x, toFloat y)
 
-options : Address Action -> List Html
-options address =
-  List.concatMap (radio address) ["glider", "gliderGun", "grower", "dieHard", "horizontal"]
+options : List (Html Action)
+options =
+  List.concatMap radio ["glider", "gliderGun", "grower", "dieHard", "horizontal"]
 
-radio : Address Action -> String -> List Html
-radio address key =
+radio : String -> List (Html Action)
+radio key =
   [ input [type' "radio",
            name  "pattern",
            value key,
-           on    "change" targetChecked (\_ -> Signal.message address <| Restart key)
+           on    "change" (Json.succeed (Restart key))
           ]
           []
   , text key
@@ -152,9 +154,17 @@ radio address key =
 
 -- MAIN
 
-main : Signal Html
+--main : Signal Html
+--main =
+--  let actions      = Signal.mailbox AdvanceGeneration
+--      tick         = Signal.map (always AdvanceGeneration) (Time.fps 20)
+--      initialModel = init (Config 100 100 800 800) Patterns.gliderGun2
+--  in Signal.map (view actions.address) (Signal.foldp update initialModel (Signal.merge tick actions.signal))
+
+main : Program Never
 main =
-  let actions      = Signal.mailbox AdvanceGeneration
-      tick         = Signal.map (always AdvanceGeneration) (Time.fps 20)
-      initialModel = init (Config 100 100 800 800) Patterns.gliderGun2
-  in Signal.map (view actions.address) (Signal.foldp update initialModel (Signal.merge tick actions.signal))
+  beginnerProgram
+    { model = init (Config 100 100 800 800) Patterns.gliderGun2
+    , view = view
+    , update = update
+    }

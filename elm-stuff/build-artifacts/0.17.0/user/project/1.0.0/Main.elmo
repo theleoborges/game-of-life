@@ -1,0 +1,298 @@
+var _user$project$Main$cellView = function (_p0) {
+	var _p1 = _p0;
+	return A2(
+		_evancz$elm_graphics$Collage$move,
+		{
+			ctor: '_Tuple2',
+			_0: _elm_lang$core$Basics$toFloat(_p1.x),
+			_1: _elm_lang$core$Basics$toFloat(_p1.y)
+		},
+		A2(
+			_evancz$elm_graphics$Collage$filled,
+			_p1.alive ? _elm_lang$core$Color$black : _elm_lang$core$Color$white,
+			A2(
+				_evancz$elm_graphics$Collage$rect,
+				_elm_lang$core$Basics$toFloat(_p1.width),
+				_elm_lang$core$Basics$toFloat(_p1.height))));
+};
+var _user$project$Main$neighbouringCoords = function (_p2) {
+	var _p3 = _p2;
+	var _p5 = _p3._1;
+	var _p4 = _p3._0;
+	return _elm_lang$core$Native_List.fromArray(
+		[
+			{ctor: '_Tuple2', _0: _p4 - 1, _1: _p5 - 1},
+			{ctor: '_Tuple2', _0: _p4 - 1, _1: _p5},
+			{ctor: '_Tuple2', _0: _p4 - 1, _1: _p5 + 1},
+			{ctor: '_Tuple2', _0: _p4, _1: _p5 - 1},
+			{ctor: '_Tuple2', _0: _p4, _1: _p5 + 1},
+			{ctor: '_Tuple2', _0: _p4 + 1, _1: _p5 - 1},
+			{ctor: '_Tuple2', _0: _p4 + 1, _1: _p5},
+			{ctor: '_Tuple2', _0: _p4 + 1, _1: _p5 + 1}
+		]);
+};
+var _user$project$Main$numAliveNeighbours = F2(
+	function (dict, coord) {
+		var livingStatus = F2(
+			function (coord, acc) {
+				return A2(
+					_elm_lang$core$Maybe$withDefault,
+					acc,
+					A2(
+						_elm_lang$core$Maybe$map,
+						function (cell) {
+							return cell.alive ? (acc + 1) : acc;
+						},
+						A2(_elm_lang$core$Dict$get, coord, dict)));
+			});
+		var neighbours = _user$project$Main$neighbouringCoords(coord);
+		return A3(_elm_lang$core$List$foldr, livingStatus, 0, neighbours);
+	});
+var _user$project$Main$toggleIf = F3(
+	function (pred, cell, n) {
+		return pred(n) ? _elm_lang$core$Native_Utils.update(
+			cell,
+			{
+				alive: _elm_lang$core$Basics$not(cell.alive)
+			}) : cell;
+	});
+var _user$project$Main$updateCell = F3(
+	function (dict, coord, cell) {
+		var n = A2(_user$project$Main$numAliveNeighbours, dict, coord);
+		var _p6 = cell.alive;
+		if (_p6 === true) {
+			return A3(
+				_user$project$Main$toggleIf,
+				function (n) {
+					return (_elm_lang$core$Native_Utils.cmp(n, 2) < 0) || (_elm_lang$core$Native_Utils.cmp(n, 3) > 0);
+				},
+				cell,
+				n);
+		} else {
+			return A3(
+				_user$project$Main$toggleIf,
+				F2(
+					function (x, y) {
+						return _elm_lang$core$Native_Utils.eq(x, y);
+					})(3),
+				cell,
+				n);
+		}
+	});
+var _user$project$Main$advanceGeneration = F3(
+	function (generation, coord, _p7) {
+		var _p8 = _p7;
+		var _p13 = _p8._1;
+		var _p12 = _p8._0;
+		var updateModel = function (_p9) {
+			var _p10 = _p9;
+			var _p11 = _p10._1;
+			return {
+				ctor: '_Tuple2',
+				_0: A3(_elm_lang$core$Dict$insert, coord, _p11, _p12),
+				_1: (!_elm_lang$core$Native_Utils.eq(_p10._0.alive, _p11.alive)) ? A2(
+					_elm_lang$core$List$append,
+					_p13,
+					A2(
+						_elm_lang$core$List_ops['::'],
+						coord,
+						_user$project$Main$neighbouringCoords(coord))) : _p13
+			};
+		};
+		return A2(
+			_elm_lang$core$Maybe$withDefault,
+			{ctor: '_Tuple2', _0: _p12, _1: _p13},
+			A2(
+				_elm_lang$core$Maybe$map,
+				updateModel,
+				A2(
+					_elm_lang$core$Maybe$map,
+					A2(
+						_user$project$Utils$ap,
+						F2(
+							function (v0, v1) {
+								return {ctor: '_Tuple2', _0: v0, _1: v1};
+							}),
+						A2(_user$project$Main$updateCell, generation, coord)),
+					A2(_elm_lang$core$Dict$get, coord, generation))));
+	});
+var _user$project$Main$Model = F3(
+	function (a, b, c) {
+		return {generation: a, livingCells: b, config: c};
+	});
+var _user$project$Main$Cell = F5(
+	function (a, b, c, d, e) {
+		return {x: a, y: b, height: c, width: d, alive: e};
+	});
+var _user$project$Main$cells = F2(
+	function (_p14, pattern) {
+		var _p15 = _p14;
+		var makeCell = function (_p16) {
+			var _p17 = _p16;
+			var _p19 = _p17._1;
+			var _p18 = _p17._0;
+			var y$ = ((0 - _p19) * 10) + _elm_lang$core$Basics$round(_p15.height / 2);
+			var x$ = (_p18 * 10) - _elm_lang$core$Basics$round(_p15.width / 2);
+			var alive = A2(
+				_elm_lang$core$List$member,
+				{ctor: '_Tuple2', _0: _p18, _1: _p19},
+				pattern);
+			return {
+				ctor: '_Tuple2',
+				_0: {ctor: '_Tuple2', _0: _p18, _1: _p19},
+				_1: A5(_user$project$Main$Cell, x$, y$, 10, 10, alive)
+			};
+		};
+		return A2(
+			_elm_lang$core$List$map,
+			makeCell,
+			A2(_user$project$Utils$grid2d, _p15.rows, _p15.columns));
+	});
+var _user$project$Main$init = F2(
+	function (config, pattern) {
+		var cells$ = A2(_user$project$Main$cells, config, pattern);
+		var livingCells = _elm_lang$core$Set$fromList(
+			A2(
+				_elm_lang$core$List$concatMap,
+				A2(
+					_user$project$Utils$ap,
+					F2(
+						function (x, y) {
+							return A2(_elm_lang$core$List_ops['::'], x, y);
+						}),
+					_user$project$Main$neighbouringCoords),
+				A2(
+					_elm_lang$core$List$map,
+					_elm_lang$core$Basics$fst,
+					A2(
+						_elm_lang$core$List$filter,
+						function (_p20) {
+							return function (_) {
+								return _.alive;
+							}(
+								_elm_lang$core$Basics$snd(_p20));
+						},
+						cells$))));
+		return A3(
+			_user$project$Main$Model,
+			_elm_lang$core$Dict$fromList(cells$),
+			livingCells,
+			config);
+	});
+var _user$project$Main$update = F2(
+	function (action, model) {
+		var _p21 = action;
+		if (_p21.ctor === 'AdvanceGeneration') {
+			var _p22 = A3(
+				_elm_lang$core$Set$foldr,
+				_user$project$Main$advanceGeneration(model.generation),
+				{
+					ctor: '_Tuple2',
+					_0: model.generation,
+					_1: _elm_lang$core$Native_List.fromArray(
+						[])
+				},
+				model.livingCells);
+			var generation$ = _p22._0;
+			var livingCells$ = _p22._1;
+			return _elm_lang$core$Native_Utils.update(
+				model,
+				{
+					generation: generation$,
+					livingCells: _elm_lang$core$Set$fromList(livingCells$)
+				});
+		} else {
+			return A2(
+				_user$project$Main$init,
+				model.config,
+				_user$project$Patterns$getPattern(_p21._0));
+		}
+	});
+var _user$project$Main$Config = F4(
+	function (a, b, c, d) {
+		return {rows: a, columns: b, height: c, width: d};
+	});
+var _user$project$Main$Restart = function (a) {
+	return {ctor: 'Restart', _0: a};
+};
+var _user$project$Main$radio = function (key) {
+	return _elm_lang$core$Native_List.fromArray(
+		[
+			A2(
+			_elm_lang$html$Html$input,
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html_Attributes$type$('radio'),
+					_elm_lang$html$Html_Attributes$name('pattern'),
+					_elm_lang$html$Html_Attributes$value(key),
+					A2(
+					_elm_lang$html$Html_Events$on,
+					'change',
+					_elm_lang$core$Json_Decode$succeed(
+						_user$project$Main$Restart(key)))
+				]),
+			_elm_lang$core$Native_List.fromArray(
+				[])),
+			_elm_lang$html$Html$text(key)
+		]);
+};
+var _user$project$Main$options = A2(
+	_elm_lang$core$List$concatMap,
+	_user$project$Main$radio,
+	_elm_lang$core$Native_List.fromArray(
+		['glider', 'gliderGun', 'grower', 'dieHard', 'horizontal']));
+var _user$project$Main$view = function (_p23) {
+	var _p24 = _p23;
+	var _p26 = _p24.config;
+	var view$ = F2(
+		function (coord, cells) {
+			return A2(
+				_elm_lang$core$Maybe$withDefault,
+				cells,
+				A2(
+					_elm_lang$core$Maybe$map,
+					function (_p25) {
+						return A3(
+							_elm_lang$core$Basics$flip,
+							F2(
+								function (x, y) {
+									return A2(_elm_lang$core$List_ops['::'], x, y);
+								}),
+							cells,
+							_user$project$Main$cellView(_p25));
+					},
+					A2(_elm_lang$core$Dict$get, coord, _p24.generation)));
+		});
+	var grid = _evancz$elm_graphics$Element$toHtml(
+		A3(
+			_evancz$elm_graphics$Collage$collage,
+			_elm_lang$core$Basics$round(_p26.width),
+			_elm_lang$core$Basics$round(_p26.height),
+			A3(
+				_elm_lang$core$Set$foldr,
+				view$,
+				_elm_lang$core$Native_List.fromArray(
+					[]),
+				_p24.livingCells)));
+	return A2(
+		_elm_lang$html$Html$div,
+		_elm_lang$core$Native_List.fromArray(
+			[]),
+		A2(
+			_elm_lang$core$Basics_ops['++'],
+			_user$project$Main$options,
+			_elm_lang$core$Native_List.fromArray(
+				[grid])));
+};
+var _user$project$Main$main = {
+	main: _elm_lang$html$Html_App$beginnerProgram(
+		{
+			model: A2(
+				_user$project$Main$init,
+				A4(_user$project$Main$Config, 100, 100, 800, 800),
+				_user$project$Patterns$gliderGun2),
+			view: _user$project$Main$view,
+			update: _user$project$Main$update
+		})
+};
+var _user$project$Main$AdvanceGeneration = {ctor: 'AdvanceGeneration'};
