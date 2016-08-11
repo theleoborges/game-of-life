@@ -153,14 +153,18 @@ radio key =
   , text key
   ]
 
--- MAIN
+-- SUBSCRIPTIONS
 
+subscriptions   : Model -> Sub Action
+subscriptions _ = AnimationFrame.diffs (always AdvanceGeneration)
+
+-- MAIN
 main : Program Never
 main =
   let init' = init (Config 100 100 800 800) Patterns.gliderGun2
   in program
-       { init = (init', Cmd.none)
-       , view = view
-       , update = update
-       , subscriptions = (\_ -> AnimationFrame.diffs (\_ -> AdvanceGeneration))
+       { init          = (init', Cmd.none)
+       , view          = view
+       , update        = update
+       , subscriptions = subscriptions
        }
