@@ -16,6 +16,7 @@ import Html.Events      exposing (on, targetChecked)
 import VirtualDom       exposing (Node)
 import Json.Decode      as Json
 import AnimationFrame   exposing (..)
+import Platform.Cmd     as Cmd exposing (Cmd)
 
 -- MODEL
 
@@ -56,16 +57,16 @@ type Action = AdvanceGeneration
 
 type alias PatternName = String
 
-update : Action -> Model -> Model
+update : Action -> Model -> (Model, Cmd Action)
 update action model =
   case action of
     AdvanceGeneration ->
       let (generation', livingCells') =
             Set.foldr (advanceGeneration model.generation) (model.generation, []) model.livingCells
-      in { model | generation  = generation',
-                   livingCells = Set.fromList livingCells' }
+      in ({ model | generation  = generation',
+                    livingCells = Set.fromList livingCells' }, Cmd.none)
 
-    (Restart name) -> init model.config <| getPattern name
+    (Restart name) -> (init model.config <| getPattern name, Cmd.none)
 
 advanceGeneration : Gen
                     -> Coord
@@ -154,17 +155,12 @@ radio key =
 
 -- MAIN
 
---main : Signal Html
---main =
---  let actions      = Signal.mailbox AdvanceGeneration
---      tick         = Signal.map (always AdvanceGeneration) (Time.fps 20)
---      initialModel = init (Config 100 100 800 800) Patterns.gliderGun2
---  in Signal.map (view actions.address) (Signal.foldp update initialModel (Signal.merge tick actions.signal))
-
 main : Program Never
 main =
-  beginnerProgram
-    { model = init (Config 100 100 800 800) Patterns.gliderGun2
-    , view = view
-    , update = update
-    }
+  let init' = init (Config 100 100 800 800) Patterns.gliderGun2
+  in program
+       { init = (init', Cmd.none)
+       , view = view
+       , update = update
+       , subscriptions = (\_ -> AnimationFrame.diffs (\_ -> AdvanceGeneration))
+       }
